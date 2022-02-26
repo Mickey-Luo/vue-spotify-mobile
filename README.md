@@ -1,1 +1,1 @@
-# vant-sotify
+# vant-spotify
