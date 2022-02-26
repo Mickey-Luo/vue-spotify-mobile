@@ -1,8 +1,27 @@
-import Vue from 'vue'
-import App from './App.vue'
+import Vue from "vue"
+import App from "./App.vue"
 
 Vue.config.productionTip = false
 
+// Vant
+import { Tabbar, TabbarItem, Col, Row, Icon, Grid, GridItem, Lazyload, Image as VanImage } from "vant"
+
+Vue.use(Tabbar)
+Vue.use(TabbarItem)
+Vue.use(Col)
+Vue.use(Row)
+Vue.use(Icon)
+Vue.use(Grid)
+Vue.use(GridItem)
+Vue.use(Lazyload, {
+  lazyComponent: true
+})
+Vue.use(VanImage)
+
+// VueRouter
+import router from "./router/index"
+
 new Vue({
-  render: h => h(App),
-}).$mount('#app')
+  router,
+  render: (h) => h(App)
+}).$mount("#app")
