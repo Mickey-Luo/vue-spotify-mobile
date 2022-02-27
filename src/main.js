@@ -9,6 +9,7 @@ Vue.prototype.$spotifyApi = spotifyApi
 
 // Vant
 import {
+  Button,
   NavBar,
   Sticky,
   Empty,
@@ -27,6 +28,8 @@ import {
   Image as VanImage
 } from "vant"
 
+Vue.use(Button)
+Vue.use(NavBar)
 Vue.use(NavBar)
 Vue.use(Sticky)
 Vue.use(Empty)
