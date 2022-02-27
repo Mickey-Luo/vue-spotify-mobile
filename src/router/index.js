@@ -6,7 +6,7 @@ Vue.use(VueRouter)
 // 路由规则
 const routes = [
   {
-    path: "/get-token/:access_token",
+    path: "/get-token/:access_token/:refresh_token",
     component: () => import("../views/get-token.vue")
   },
   {

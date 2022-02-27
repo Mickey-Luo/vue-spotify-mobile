@@ -5,10 +5,13 @@ Vue.config.productionTip = false
 
 // spotifyApi
 import spotifyApi from "@/api/spotifyApi"
+import { refreshToken } from "@/api/axios"
+spotifyApi.refreshToken = refreshToken
 Vue.prototype.$spotifyApi = spotifyApi
 
 // Vant
 import {
+  Search,
   ActionSheet,
   Button,
   NavBar,
@@ -29,6 +32,7 @@ import {
   Image as VanImage
 } from "vant"
 
+Vue.use(Search)
 Vue.use(ActionSheet)
 Vue.use(Button)
 Vue.use(NavBar)
