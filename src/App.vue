@@ -20,7 +20,6 @@
         // 如果都没有token,跳转到认证页面
         location.href = "http://localhost:8888"
       }
-      
     },
     name: "App",
     components: {},
