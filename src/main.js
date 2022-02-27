@@ -3,6 +3,10 @@ import App from "./App.vue"
 
 Vue.config.productionTip = false
 
+// spotifyApi
+import spotifyApi from "@/api/spotifyApi"
+Vue.prototype.$spotifyApi = spotifyApi
+
 // Vant
 import { Tabbar, TabbarItem, Col, Row, Icon, Grid, GridItem, Lazyload, Image as VanImage } from "vant"
 
