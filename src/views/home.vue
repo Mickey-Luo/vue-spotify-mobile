@@ -9,15 +9,34 @@
     <van-nav-bar class="fixed-nav" left-arrow />
 
     <van-sticky @scroll="scroll">
-      <van-nav-bar
-        class=""
-        :border="false"
-        title="收藏的歌"
-        left-arrow
-        :style="{ opacity: scrollTop / 250 }"
-      />
+      <van-nav-bar class="" :border="false" left-arrow :style="{ opacity: scrollTop / 250 }">
+        <template #title>
+          <p
+            :style="{
+              opacity: (scrollTop - 150) / 50,
+              transform: 'translateY(' + 80 / (scrollTop - 150) + 'px)'
+            }"
+          >
+            已收藏的歌曲
+          </p>
+        </template></van-nav-bar
+      >
     </van-sticky>
     <!-- 曲目列表 -->
+    <van-search
+      v-model="searchValue"
+      show-action
+      shape="round"
+      placeholder="请输入搜索关键词"
+      :style="{ opacity: 1 - (scrollTop - 5) / 25 }"
+    >
+      <template #action>
+        <!-- <div @click="onSearch">搜索</div> -->
+        <div>排序</div>
+      </template>
+    </van-search>
+    <h2 class="page-title" :style="{ opacity: 1.1 - (scrollTop - 50) / 80 }">已收藏的歌曲</h2>
+    <van-empty description="占位图：还没做好" :style="{ opacity: 1 - scrollTop / 250 }" />
     <div class="track-list-container">
       <van-list
         ref="list"
@@ -27,7 +46,6 @@
         finished-text="没有更多了"
         @load="onLoad"
       >
-        <van-empty description="占位图：还没做好" />
         <!-- 曲目单元 -->
         <van-cell
           class="track-item"
@@ -83,7 +101,8 @@
         // 滚动距离
         scrollTop: 0,
         show: false,
-        actions: [{ name: "选项一" }, { name: "选项二" }, { name: "选项三" }]
+        actions: [{ name: "选项一" }, { name: "选项二" }, { name: "选项三" }],
+        searchValue: ""
       }
     },
     methods: {
@@ -91,9 +110,14 @@
         // 异步更新数据
         console.log("异步更新数据")
         this.$spotifyApi.getMySavedTracks({ offset: this.offset, limit: 20 }, (err, data) => {
-          if (err) console.error(err)
-          else {
-            console.log(data.items)
+          if (err) {
+            console.error(err)
+            // 如果token过期
+            if (err.status === 401) alert("token过期")
+            this.$spotifyApi.refreshToken()
+            // this.$forceUpdate()
+          } else {
+            // console.log(data.items)
 
             // 添加数据到数组
             this.list.push(...data.items)
@@ -111,6 +135,7 @@
         this.offset += 20
       },
       scroll(e) {
+        console.log(parseInt(150 / (150 - e.scrollTop)))
         this.scrollTop = e.scrollTop
       }
     }
@@ -118,6 +143,11 @@
 </script>
 
 <style lang="less">
+  h2.page-title {
+    // display: block;
+    box-sizing: border-box;
+    padding: 0 14px;
+  }
   .fixed-nav {
     position: fixed;
     top: 0;
