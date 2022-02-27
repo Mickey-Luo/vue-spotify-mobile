@@ -1,17 +1,26 @@
 <template>
   <div id="home">
-    <van-row type="flex" justify="space-between">
+    <!-- <van-row type="flex" justify="space-between">
       <van-col span="6">晚上好</van-col>
       <van-col span="6"
         ><van-icon name="bullhorn-o" /><van-icon name="clock-o" /><van-icon name="setting-o"
       /></van-col>
-    </van-row>
-    <van-sticky :offset-top="20">
-      <van-button class="" type="info">吸顶距离</van-button>
+    </van-row> -->
+    <van-nav-bar class="fixed-nav" left-arrow />
+
+    <van-sticky @scroll="scroll">
+      <van-nav-bar
+        class=""
+        :border="false"
+        title="收藏的歌"
+        left-arrow
+        :style="{ opacity: scrollTop / 250 }"
+      />
     </van-sticky>
     <!-- 曲目列表 -->
     <div class="track-list-container">
       <van-list
+        ref="list"
         class="track-list"
         v-model="loading"
         :finished="finished"
@@ -21,7 +30,6 @@
         <van-empty description="占位图：还没做好" />
         <!-- 曲目单元 -->
         <van-cell
-          clickable
           class="track-item"
           v-for="item in list"
           v-lazy="item.track.album.images[1].url"
@@ -45,6 +53,8 @@
                 </span>
               </div>
             </van-col>
+            <!-- 小图标 -->
+            <van-button @click.prevent.stop="1" round icon="ellipsis"></van-button>
           </van-row>
         </van-cell>
       </van-list>
@@ -54,14 +64,17 @@
 
 <script>
   export default {
-    created() {},
+    name: "home",
     data() {
       return {
         mySavedTracks: {},
         list: [],
         offset: 0,
+        // list组件参数
         loading: false,
-        finished: false
+        finished: false,
+        // 滚动距离
+        scrollTop: 0
       }
     },
     methods: {
@@ -87,12 +100,25 @@
         })
         // 请求完后
         this.offset += 20
+      },
+      scroll(e) {
+        this.scrollTop = e.scrollTop
       }
     }
   }
 </script>
 
 <style lang="less">
+  .fixed-nav {
+    position: fixed;
+    top: 0;
+  }
+  .van-nav-bar {
+    height: 60px;
+    .van-nav-bar__content {
+      height: 60px;
+    }
+  }
   .track-list-container {
     padding-bottom: 50px;
   }
@@ -106,6 +132,7 @@
         // .track-image {
         //   width: 70px;
         // }
+        height: 68px;
         .track-detail {
           padding-left: 14px;
           flex: 1;
@@ -114,6 +141,12 @@
               content: "·";
             }
           }
+        }
+        .van-button {
+          align-self: center;
+          border: none;
+          height: 48px;
+          width: 48px;
         }
       }
     }
