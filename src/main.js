@@ -9,6 +9,10 @@ Vue.prototype.$spotifyApi = spotifyApi
 
 // Vant
 import {
+  NavBar,
+  Sticky,
+  Empty,
+  Loading,
   Cell,
   CellGroup,
   List,
@@ -23,6 +27,11 @@ import {
   Image as VanImage
 } from "vant"
 
+Vue.use(NavBar)
+Vue.use(Sticky)
+Vue.use(Empty)
+Vue.use(Loading)
+Vue.use(Loading)
 Vue.use(Cell)
 Vue.use(CellGroup)
 Vue.use(List)
