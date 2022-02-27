@@ -54,9 +54,16 @@
               </div>
             </van-col>
             <!-- 小图标 -->
-            <van-button @click.prevent.stop="1" round icon="ellipsis"></van-button>
+            <van-button @click="show = true" round icon="ellipsis"></van-button>
           </van-row>
         </van-cell>
+        <van-action-sheet
+          v-model="show"
+          :actions="actions"
+          cancel-text="取消"
+          description="这是一段描述信息"
+          close-on-click-action
+        />
       </van-list>
     </div>
   </div>
@@ -74,7 +81,9 @@
         loading: false,
         finished: false,
         // 滚动距离
-        scrollTop: 0
+        scrollTop: 0,
+        show: false,
+        actions: [{ name: "选项一" }, { name: "选项二" }, { name: "选项三" }]
       }
     },
     methods: {
@@ -136,7 +145,11 @@
         .track-detail {
           padding-left: 14px;
           flex: 1;
+          .track-name {
+            font-weight: 500;
+          }
           .artist-name-container {
+            opacity: 0.6;
             .artist-name + .artist-name::before {
               content: "·";
             }
