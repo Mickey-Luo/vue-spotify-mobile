@@ -11,6 +11,7 @@
 
 <script>
 export default {
+  created() {},
   name: "App",
   components: {},
   data() {

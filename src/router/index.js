@@ -6,8 +6,8 @@ Vue.use(VueRouter)
 // 路由规则
 const routes = [
   {
-    path: "/",
-    redirect: "/home"
+    path: "/get-token/:access_token",
+    component: () => import("../views/get-token.vue")
   },
   {
     path: "/home",
