@@ -8,8 +8,9 @@ import spotifyApi from "@/api/spotifyApi"
 Vue.prototype.$spotifyApi = spotifyApi
 
 // Vant
-import { Tabbar, TabbarItem, Col, Row, Icon, Grid, GridItem, Lazyload, Image as VanImage } from "vant"
+import { List, Tabbar, TabbarItem, Col, Row, Icon, Grid, GridItem, Lazyload, Image as VanImage } from "vant"
 
+Vue.use(List)
 Vue.use(Tabbar)
 Vue.use(TabbarItem)
 Vue.use(Col)
