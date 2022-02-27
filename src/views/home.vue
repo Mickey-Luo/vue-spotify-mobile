@@ -7,17 +7,20 @@
     <van-grid clickable direction="horizontal" :gutter="10" :column-num="2">
       <van-grid-item v-for="value in 6" :key="value" icon="photo-o" text="文字" />
     </van-grid>
-    <div>
-    </div>
+    <div></div>
   </div>
 </template>
 
 <script>
-export default {}
+export default {
+  created() {
+    console.log(2)
+    this.$spotifyApi.getMySavedTracks("", function (err, data) {
+      if (err) console.error(err)
+      else console.log("Artist albums", data)
+    })
+  }
+}
 </script>
 
-<style lang="less">
-#home /deep/ .slider {
-  width: 1000px;
-}
-</style>
+<style lang="less"></style>
