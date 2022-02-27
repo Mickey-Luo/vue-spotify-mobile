@@ -14,10 +14,9 @@
 <script>
 export default {
   created() {
-    console.log(2)
-    this.$spotifyApi.getMySavedTracks("", function (err, data) {
+    this.$spotifyApi.getMySavedTracks({}, function (err, data) {
       if (err) console.error(err)
-      else console.log("Artist albums", data)
+      else console.log("MySavedTracks", data)
     })
   }
 }

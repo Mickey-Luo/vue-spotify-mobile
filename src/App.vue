@@ -26,9 +26,9 @@ export default {
       location.href = "http://localhost:8888"
     }
     // 等带一会路由掉home页面
-    setTimeout(() => {
-      this.$router.push("/home")
-    }, 500)
+    // setTimeout(() => {
+    this.$router.push("/home")
+    // }, 500)
   },
   name: "App",
   components: {},
