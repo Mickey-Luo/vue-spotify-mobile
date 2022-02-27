@@ -36,7 +36,11 @@
       </template>
     </van-search>
     <h2 class="page-title" :style="{ opacity: 1.1 - (scrollTop - 50) / 80 }">已收藏的歌曲</h2>
-    <van-empty description="占位图：还没做好" :style="{ opacity: 1 - scrollTop / 250 }" />
+    <van-empty
+      description="占位图：还没做好"
+      :style="{ opacity: 1 - scrollTop / 250 }"
+      image-size="50px"
+    />
     <div class="track-list-container">
       <van-list
         ref="list"
