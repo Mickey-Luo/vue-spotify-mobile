@@ -9,6 +9,7 @@ Vue.prototype.$spotifyApi = spotifyApi
 
 // Vant
 import {
+  ActionSheet,
   Button,
   NavBar,
   Sticky,
@@ -28,6 +29,7 @@ import {
   Image as VanImage
 } from "vant"
 
+Vue.use(ActionSheet)
 Vue.use(Button)
 Vue.use(NavBar)
 Vue.use(NavBar)
