@@ -11,6 +11,8 @@ Vue.prototype.$spotifyApi = spotifyApi
 
 // Vant
 import {
+  Slider,
+  Circle,
   Search,
   ActionSheet,
   Button,
@@ -32,6 +34,8 @@ import {
   Image as VanImage
 } from "vant"
 
+Vue.use(Slider)
+Vue.use(Circle)
 Vue.use(Search)
 Vue.use(ActionSheet)
 Vue.use(Button)
