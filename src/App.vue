@@ -31,7 +31,7 @@
   }
 </script>
 
-<style>
+<style lang="less">
   /* #app {
     font-family: Avenir, Helvetica, Arial, sans-serif;
     -webkit-font-smoothing: antialiased;
@@ -40,4 +40,7 @@
     color: #2c3e50;
     margin-top: 60px;
   } */
+  .van-tabbar {
+    height: 60px;
+  }
 </style>
