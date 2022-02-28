@@ -84,23 +84,30 @@
               <van-col class="track-image">
                 <van-image :src="item.track.album.images[1].url" fit="cover" height="68" width="68"
                   ><template v-slot:loading>
-                    <van-loading type="spinner" size="20" />
+                    <van-loading type="spinner" />
                   </template>
                 </van-image>
               </van-col>
-
+              <!-- 圆环 -->
               <van-circle
                 :style="{
-                  visibility: isPlaying && playingId === item.track.id ? 'visible' : 'hidden'
+                  visibility: playPromise && playingId === item.track.id ? 'visible' : 'hidden'
                 }"
-                :stroke-width="60"
+                :stroke-width="70"
                 v-model="currentTime"
                 layer-color="#fff"
                 color="#1fd760"
                 :rate="100"
               >
-                <!-- 暂停 -->
-                <van-icon name="pause" size="27px" color="#1fd760" />
+                <!-- 播放 - 暂停 -->
+                <van-icon v-show="!isPlaying" name="play" size="27px" color="#1fd760" />
+                <van-icon v-show="isPlaying" name="pause" size="27px" color="#1fd760" />
+                <!-- 加载图标 -->
+                <van-loading
+                  :style="{
+                    visibility: playPromise && inQueueId === item.track.id ? 'visible' : 'hidden'
+                  }"
+                />
               </van-circle>
             </div>
             <!-- 曲目信息 -->
@@ -112,17 +119,39 @@
                 </span>
               </div>
             </van-col>
-            <!-- 小图标 -->
-            <van-button @click="show = true" round icon="ellipsis"></van-button>
+            <!-- 动作图标 -->
+            <van-button
+              @click.stop="
+                ;(show = true), showFn(item.track.name, item.track.artists, item.track.album)
+              "
+              round
+              icon="ellipsis"
+            ></van-button>
           </van-row>
         </van-cell>
+        <!-- 动作面板 -->
         <van-action-sheet
           v-model="show"
           :actions="actions"
           cancel-text="取消"
-          description="这是一段描述信息"
           close-on-click-action
-        />
+          safe-area-inset-bottom
+        >
+          <template #description>
+            <p></p>
+            <van-image
+              :src="showAlbum && showAlbum.images[0].url"
+              fit="cover"
+              height="128"
+              width="128"
+              ><template v-slot:loading>
+                <van-loading type="spinner" />
+              </template>
+            </van-image>
+            <h2>{{ showName }}</h2>
+            <p>{{ showArtists.join(" · ") }}</p>
+          </template></van-action-sheet
+        >
       </van-list>
     </div>
   </div>
@@ -142,17 +171,29 @@
         // 滚动距离
         scrollTop: 0,
         show: false,
-        actions: [{ name: "选项一" }, { name: "选项二" }, { name: "选项三" }],
+        actions: [
+          { name: "查看专辑", icon: "star-o" },
+          { name: "查看艺人" },
+          { name: "添加到歌单" }
+        ],
         searchValue: "",
         total: 0,
         counter: 0,
         // 进度圈
         currentRate: 0,
-        isPlaying: false,
-        playingId: 0,
         currentTime: 0,
         defaultVolume: 50,
-        queue: 0
+        playPromise: null,
+        isPlaying: false,
+        showName: "",
+        showArtists: [],
+        showAlbum: "",
+        playingId: "",
+        playingName: "",
+        playingArtists: [],
+        inQueueId: "",
+        inQueueUrl: "",
+        ready: true
       }
     },
     methods: {
@@ -216,50 +257,75 @@
           behavior: "smooth"
         })
       },
+      // 点击歌曲单元：
       play(url, id) {
         const audio = this.$refs.audio
-        // 如果在播放且队列空
-        console.log(this.queue)
-        if (this.queue > 0) return
-        if (this.isPlaying) {
-          // 如果是同一首曲子
-          if (this.playingId === id) {
-            // 暂停
+        // // 如果正在播放，
+        // if (this.playPromise) {
+
+        // 如果点击的是同一首曲子
+        if (this.playingId === id) {
+          if (this.isPlaying) {
+            // 暂停并准备
             audio.pause()
-            // 清除播放状态
-            this.queue = 0
             this.isPlaying = false
           } else {
-            // 是不同的曲子
-            audio.pause()
-            this.playingId = id
-            this.isPlaying = false
-            this.queue++
-            audio.src = url
-            audio.play().then(() => {
-              this.queue = 0
-              this.isPlaying = true
-            })
+            this.playPromise = audio.play()
+            this.isPlaying = true
           }
         } else {
-          // 如果未在播放
-          this.queue++
-          this.playingId = id
-          this.isPlaying = true
-          audio.src = url
-          audio.play().then(() => {
-            this.queue = 0
-            this.isPlaying = true
+          // 如果是不同的曲子，先设置inQueueId和Url
+          this.inQueueId = id
+          this.inQueueUrl = url
+          // 如果已经准备好了, 用inQueueId播放
+          if (this.ready) {
+            this.ready = false
+            audio.pause()
+            audio.src = this.inQueueUrl
+            this.playPromise = audio.play()
+            console.log("play", this.inQueueId)
+            this.playPromise.then(() => {
+              // 播放完成后
+              this.isPlaying = true
+              this.afterPlay()
+            })
+          }
+        }
+      },
+      afterPlay() {
+        const audio = this.$refs.audio
+        // 如果有inQueueId，接着播放inQueue
+        if (this.inQueueId) {
+          audio.src = this.inQueueUrl
+          this.playPromise = audio.play()
+          this.playPromise.then(() => {
+            // 播放完成后准备
+            this.playingId = this.inQueueId
+            this.inQueueId = ""
+            this.inQueueUrl = ""
+            this.ready = true
           })
+        } else {
+          // 没有Queue直接准备
+          this.ready = true
+          this.playingId = this.inQueueId
         }
       },
       timeupdate(e) {
         // console.log(e)
         this.currentTime = e.target.currentTime * 3.3
+      },
+      showFn(name, artists, album) {
+        this.showName = name
+        this.showArtists = artists.map((v) => {
+          console.log(v)
+          return v.name
+        })
+        this.showAlbum = album
       }
     },
     mounted() {
-      this.$refs.audio.volume = 0.5
+      // this.$refs.audio.volume = 0.5
     },
     computed: {
       volume: {
@@ -319,7 +385,15 @@
             align-items: center;
             width: 68px;
             height: 68px;
-            background-color: #0008;
+            background-color: #0006;
+            svg {
+              position: absolute;
+              left: 50%;
+              top: 50%;
+              transform: translate(-50%, -50%);
+              width: 48px;
+              height: 48px;
+            }
           }
           .van-image,
           .van-icon {
@@ -347,6 +421,15 @@
           width: 48px;
           background-color: #fff0;
         }
+      }
+    }
+    .van-action-sheet {
+      max-height: 90%;
+      .van-action-sheet__item {
+        height: 60px;
+      }
+      .van-action-sheet__cancel {
+        height: 60px;
       }
     }
   }
