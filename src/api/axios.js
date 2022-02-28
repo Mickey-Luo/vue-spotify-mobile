@@ -10,8 +10,6 @@ export function refreshToken() {
   })
     .then((res) => {
       localStorage.setItem("vant_spotify_token", res.data.access_token)
-      console.log("token续约成功，强制刷新")
-      this.$forceUpdate()
     })
     .catch((err) => {
       console.log(err)
