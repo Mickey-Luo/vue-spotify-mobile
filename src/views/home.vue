@@ -75,6 +75,7 @@
           v-for="item in list"
           v-lazy="item.track.album.images[1].url"
           :key="item.track.id"
+          clickable
           @click="play(item.track.preview_url, item.track.id)"
         >
           <van-row class="track-item-flexbox" type="flex">
@@ -148,9 +149,10 @@
         // 进度圈
         currentRate: 0,
         isPlaying: false,
-        playingId: "",
+        playingId: 0,
         currentTime: 0,
-        defaultVolume: 50
+        defaultVolume: 50,
+        queue: 0
       }
     },
     methods: {
@@ -184,7 +186,7 @@
 
             // 加载状态结束
             this.loading = false
-            
+
             // 请求完后，曲目开始数后移40位
             this.offset += 40
             // 数据全部加载完成
@@ -215,14 +217,41 @@
         })
       },
       play(url, id) {
-        if (this.isPlaying && this.playingId === id) {
-          this.$refs.audio.pause()
-          return (this.isPlaying = false)
+        const audio = this.$refs.audio
+        // 如果在播放且队列空
+        console.log(this.queue)
+        if (this.queue > 0) return
+        if (this.isPlaying) {
+          // 如果是同一首曲子
+          if (this.playingId === id) {
+            // 暂停
+            audio.pause()
+            // 清除播放状态
+            this.queue = 0
+            this.isPlaying = false
+          } else {
+            // 是不同的曲子
+            audio.pause()
+            this.playingId = id
+            this.isPlaying = false
+            this.queue++
+            audio.src = url
+            audio.play().then(() => {
+              this.queue = 0
+              this.isPlaying = true
+            })
+          }
+        } else {
+          // 如果未在播放
+          this.queue++
+          this.playingId = id
+          this.isPlaying = true
+          audio.src = url
+          audio.play().then(() => {
+            this.queue = 0
+            this.isPlaying = true
+          })
         }
-        this.$refs.audio.src = url
-        this.$refs.audio.play()
-        this.playingId = id
-        this.isPlaying = true
       },
       timeupdate(e) {
         // console.log(e)
@@ -316,6 +345,7 @@
           border: none;
           height: 48px;
           width: 48px;
+          background-color: #fff0;
         }
       }
     }
