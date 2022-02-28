@@ -1,17 +1,8 @@
 <template>
   <div>
-    <audio
-      ref="audio"
-      src="https://p.scdn.co/mp3-preview/faba31300045dcff51050ee0d6a6e2d51b55aed4?cid=e1e7445863f4451b87848d1850d31010"
-      preload
-      loop
-      id="audio"
-      controls
-      muted
-      @timeupdate="timeUpdate"
-    ></audio>
+    <audio ref="audio" src="" preload loop id="audio" muted @timeupdate="timeUpdate"></audio>
     <!-- 音量条 -->
-    <p><van-slider v-model="volume" /></p>
+    <!-- <p><van-slider v-model="volume" /></p> -->
   </div>
 </template>
 
@@ -28,12 +19,15 @@
         showName: "",
         showArtists: [],
         showAlbum: "",
-        playingId: "",
-        playingName: "",
-        playingArtists: [],
-        inQueueId: "",
+        playingId_local: "",
+        playingName_local: "Vant-Spotify",
+        playingUrl_local: "",
+        playingArtists_local: [],
+        playingAlbum_local: [],
+        inQueueId_local: "",
         inQueueUrl: "",
         ready: true
+
         // 圆环
       }
     },
@@ -44,7 +38,58 @@
         },
         set(boolean) {
           this.isPlaying_local = boolean
-          EventBus.$emit("playState", this.isPlaying_local)
+          EventBus.$emit("playState", boolean)
+          this.$nextTick(() => {
+            this.$emit("playState", {
+              url: this.playingUrl_local,
+              id: this.playingId_local,
+              name: this.playingName_local,
+              artists: this.playingArtists_local,
+              isPlaying: this.isPlaying_local
+            })
+          })
+        }
+      },
+      inQueueId: {
+        get() {
+          return this.inQueueId_local
+        },
+        set(id) {
+          this.inQueueId_local = id
+          EventBus.$emit("queue", id)
+        }
+      },
+      // note: 可能要清除的代码,命名也可以精简
+      playingName: {
+        get() {
+          return this.playingName_local
+        },
+        set(val) {
+          this.playingName_local = val
+        }
+      },
+      playingId: {
+        get() {
+          return this.playingId_local
+        },
+        set(val) {
+          this.playingId_local = val
+        }
+      },
+      playingUrl: {
+        get() {
+          return this.playingUrl_local
+        },
+        set(val) {
+          this.playingUrl_local = val
+        }
+      },
+      playingArtists: {
+        get() {
+          return this.playingArtists_local
+        },
+        set(arr) {
+          this.playingArtists_local = arr
         }
       },
       volume: {
@@ -59,12 +104,10 @@
     },
 
     methods: {
-      play(url, id) {
+      play(url, id, name, artists) {
         const audio = this.$refs.audio
-        // 如果正在播放，
-
-        // 如果点击的是同一首曲子
-        if (this.playingId === id) {
+        // 如果点击的是同一首曲子并且准备好了
+        if (this.playingId === id && this.ready) {
           if (this.isPlaying) {
             // 暂停并准备
             audio.pause()
@@ -74,7 +117,7 @@
             this.isPlaying = true
           }
         } else {
-          // 如果是不同的曲子，先设置inQueueId和Url
+          // 如果是不同的曲子或者没准备好，先设置inQueueId和Url
           this.inQueueId = id
           this.inQueueUrl = url
           // 如果已经准备好了, 用inQueueId播放
@@ -86,15 +129,16 @@
             this.playPromise.then(() => {
               // 播放完成后
               this.isPlaying = true
-              this.afterPlay()
+              this.afterPlay(url, id, name, artists)
             })
           }
         }
       },
-      afterPlay() {
+      afterPlay(url, id, name, artists) {
         const audio = this.$refs.audio
-        // 如果有inQueueId，接着播放inQueue
+        // 如果有inQueueId，接着播放Queue
         if (this.inQueueId) {
+          audio.pause()
           audio.src = this.inQueueUrl
           this.playPromise = audio.play()
           this.playPromise.then(() => {
@@ -107,20 +151,15 @@
         } else {
           // 没有Queue直接准备
           this.ready = true
-          this.playingId = this.inQueueId
         }
+        this.playingUrl = url
+        this.playingId = id
+        this.playingName = name
+        this.playingArtists = artists
       },
       timeUpdate(e) {
         let time = e.target.currentTime * 3.3
         EventBus.$emit("currentTime", time)
-      },
-      showFn(name, artists, album) {
-        this.showName = name
-        this.showArtists = artists.map((v) => {
-          console.log(v)
-          return v.name
-        })
-        this.showAlbum = album
       }
     },
     mounted() {
@@ -128,8 +167,10 @@
         this.$refs.audio.volume = this.defaultVolume / 100
       })
       EventBus.$on("playOrder", (order) => {
-        console.log(order)
-        this.play(order.url, order.id)
+        order.artists = order.artists.map((v) => {
+          return v.name
+        })
+        this.play(order.url, order.id, order.name, order.artists)
       })
     }
   }
