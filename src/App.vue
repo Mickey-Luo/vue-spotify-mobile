@@ -1,16 +1,7 @@
 <template>
   <div id="app">
     <router-view></router-view>
-    <div class="player-controls">
-      <div class="container">
-        <div>
-          <p>2333</p>
-          <p>2333</p>
-        </div>
-        <van-icon name="play" size="34px" />
-      </div>
-    </div>
-    <AudioPlayer></AudioPlayer>
+    <player-controls></player-controls>
     <van-tabbar v-model="active">
       <van-tabbar-item replace to="/home" icon="home-o">主页</van-tabbar-item>
       <van-tabbar-item replace to="/search" icon="search">搜索</van-tabbar-item>
@@ -20,11 +11,11 @@
 </template>
 
 <script>
-  import AudioPlayer from "./components/audio-player.vue"
+  import PlayerControls from "@/components/player-controls.vue"
   export default {
     name: "App",
     components: {
-      AudioPlayer
+      "player-controls": PlayerControls
     },
     created() {
       // 如果本地有token,配置给api模块
@@ -55,30 +46,12 @@
   } */
   .van-tabbar {
     height: 60px;
-  }
+    background-color: #fff;
 
-  .player-controls {
-    width: 100%;
-    height: 60px;
-    position: fixed;
-    bottom: 64px;
+    background: linear-gradient(transparent -300%, rgb(255, 255, 255) 80%);
 
-    .container {
-      box-sizing: border-box;
-      margin: 0 auto;
-      padding: 4px 8px;
-      height: 100%;
-      max-width: 360px;
-      border-radius: 10px;
-      background-color: #ccc;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      & * {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-      }
+    .van-tabbar-item--active {
+      background: none;
     }
   }
 </style>

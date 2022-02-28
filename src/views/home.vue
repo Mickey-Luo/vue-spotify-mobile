@@ -50,24 +50,7 @@
       <h2>已点赞的歌曲</h2>
       <p>{{ total.toLocaleString() }} 首歌曲</p>
     </div>
-    <!-- <van-empty
-      description="占位图：还没做好"
-      :style="{ opacity: 1 - scrollTop / 250 }"
-      image-size="50px"
-    /> -->
-    <!-- 播放器 -->
-    <!-- <audio
-      ref="audio"
-      src="https://p.scdn.co/mp3-preview/faba31300045dcff51050ee0d6a6e2d51b55aed4?cid=e1e7445863f4451b87848d1850d31010"
-      preload
-      loop
-      id="audio"
-      muted
-      @timeupdate="timeupdate"
-    ></audio> -->
-    <!-- 音量条 -->
-    <!-- <p><van-slider v-model="volume" /></p> -->
-    <!-- 曲目列表 -->
+
     <div class="track-list-container">
       <van-list
         ref="list"
@@ -105,7 +88,7 @@
               </van-col>
               <!-- 圆环 -->
               <van-circle
-                v-if="isPlaying && playingId === item.track.id"
+                v-if="playingId === item.track.id || inQueueId == item.track.id"
                 :stroke-width="70"
                 v-model="currentTime"
                 layer-color="#fff"
@@ -113,14 +96,20 @@
                 :rate="0"
               >
                 <!-- 播放 - 暂停 -->
-                <van-icon v-show="!isPlaying" name="play" size="27px" color="#1fd760" />
-                <van-icon v-show="isPlaying" name="pause" size="27px" color="#1fd760" />
-                <!-- 加载图标 -->
-                <van-loading
-                  :style="{
-                    visibility: isPlaying && inQueueId === item.track.id ? 'visible' : 'hidden'
-                  }"
+                <van-icon
+                  v-if="!isPlaying && playingId === item.track.id"
+                  name="play"
+                  size="27px"
+                  color="#1fd760"
                 />
+                <van-icon
+                  v-if="isPlaying && playingId === item.track.id"
+                  name="pause"
+                  size="27px"
+                  color="#1fd760"
+                />
+                <!-- 加载图标 -->
+                <van-loading v-if="playingId === item.track.id && inQueueId === item.track.id" />
               </van-circle>
             </div>
             <!-- 曲目信息 -->
@@ -270,6 +259,15 @@
       play(order) {
         EventBus.$emit("playOrder", order)
         this.playingId = order.id
+        console.log("order")
+        console.log(order)
+      },
+      showFn(name, artists, album) {
+        this.showName = name
+        this.showArtists = artists.map((v) => {
+          return v.name
+        })
+        this.showAlbum = album
       }
     },
     mounted() {
@@ -280,6 +278,10 @@
       // 获得播放状态
       EventBus.$on("playState", (isPlaying) => {
         this.isPlaying = isPlaying
+      })
+      // 获得等待播放曲目
+      EventBus.$on("queue", (id) => {
+        this.inQueueId = id
       })
     }
   }
