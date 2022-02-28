@@ -58,7 +58,7 @@
       @timeupdate="timeupdate"
     ></audio>
     <!-- 音量条 -->
-    <p><van-slider v-model="volume" @change="changeVolume" /></p>
+    <p><van-slider v-model="volume" /></p>
     <!-- 曲目列表 -->
     <div class="track-list-container">
       <van-list
@@ -156,15 +156,22 @@
     methods: {
       onLoad() {
         // 异步获取歌曲列表
+        console.log(this.$refs.list)
+
         console.log("获取歌曲列表！")
         this.$spotifyApi.getMySavedTracks({ offset: this.offset, limit: 40 }, (err, data) => {
           if (err) {
             // ❌ 报错
-            console.error(err)
+            // console.error(err)
             // 如果token过期
-            if (err.status === 401) alert("token过期")
+            // if (err.status === 401) alert("token过期")
+            // 获取新token
             this.$spotifyApi.refreshToken()
-            return this.$forceUpdate()
+            // 重新设置token
+            this.$spotifyApi.setAccessToken(localStorage.getItem("vant_spotify_token"))
+
+            // 加载状态结束
+            this.loading = false
           } else {
             // ✅ 成功
             console.log("歌曲列表", data)
@@ -177,15 +184,15 @@
 
             // 加载状态结束
             this.loading = false
-
+            
+            // 请求完后，曲目开始数后移40位
+            this.offset += 40
             // 数据全部加载完成
             if (data.length < 2) {
               this.finished = true
             }
           }
         })
-        // 请求完后
-        this.offset += 40
       },
       scroll(e) {
         this.scrollTop = e.scrollTop
@@ -218,11 +225,8 @@
         this.isPlaying = true
       },
       timeupdate(e) {
-        console.log(e)
+        // console.log(e)
         this.currentTime = e.target.currentTime * 3.3
-      },
-      changeVolume() {
-        console.log(1)
       }
     },
     mounted() {

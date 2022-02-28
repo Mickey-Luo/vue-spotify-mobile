@@ -10,6 +10,10 @@ const routes = [
     component: () => import("../views/get-token.vue")
   },
   {
+    path: "/",
+    redirect: "/home"
+  },
+  {
     path: "/home",
     component: () => import("../views/home.vue")
   },
