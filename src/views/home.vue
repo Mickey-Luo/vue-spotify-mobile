@@ -90,14 +90,12 @@
               </van-col>
               <!-- 圆环 -->
               <van-circle
-                :style="{
-                  visibility: playPromise && playingId === item.track.id ? 'visible' : 'hidden'
-                }"
+                v-if="playPromise && playingId === item.track.id"
                 :stroke-width="70"
                 v-model="currentTime"
                 layer-color="#fff"
                 color="#1fd760"
-                :rate="100"
+                :rate="0"
               >
                 <!-- 播放 - 暂停 -->
                 <van-icon v-show="!isPlaying" name="play" size="27px" color="#1fd760" />
@@ -129,30 +127,30 @@
             ></van-button>
           </van-row>
         </van-cell>
-        <!-- 动作面板 -->
-        <van-action-sheet
-          v-model="show"
-          :actions="actions"
-          cancel-text="取消"
-          close-on-click-action
-          safe-area-inset-bottom
-        >
-          <template #description>
-            <p></p>
-            <van-image
-              :src="showAlbum && showAlbum.images[0].url"
-              fit="cover"
-              height="128"
-              width="128"
-              ><template v-slot:loading>
-                <van-loading type="spinner" />
-              </template>
-            </van-image>
-            <h2>{{ showName }}</h2>
-            <p>{{ showArtists.join(" · ") }}</p>
-          </template></van-action-sheet
-        >
       </van-list>
+      <!-- 动作面板 -->
+      <van-action-sheet
+        v-model="show"
+        :actions="actions"
+        cancel-text="取消"
+        close-on-click-action
+        safe-area-inset-bottom
+      >
+        <template #description>
+          <p></p>
+          <van-image
+            :src="showAlbum && showAlbum.images[0].url"
+            fit="cover"
+            height="128"
+            width="128"
+            ><template v-slot:loading>
+              <van-loading type="spinner" />
+            </template>
+          </van-image>
+          <h2>{{ showName }}</h2>
+          <p>{{ showArtists.join(" · ") }}</p>
+        </template></van-action-sheet
+      >
     </div>
   </div>
 </template>
@@ -199,7 +197,6 @@
     methods: {
       onLoad() {
         // 异步获取歌曲列表
-        console.log(this.$refs.list)
 
         console.log("获取歌曲列表！")
         this.$spotifyApi.getMySavedTracks({ offset: this.offset, limit: 40 }, (err, data) => {
@@ -283,7 +280,6 @@
             audio.pause()
             audio.src = this.inQueueUrl
             this.playPromise = audio.play()
-            console.log("play", this.inQueueId)
             this.playPromise.then(() => {
               // 播放完成后
               this.isPlaying = true
@@ -325,7 +321,9 @@
       }
     },
     mounted() {
-      // this.$refs.audio.volume = 0.5
+      this.$nextTick(function () {
+        this.$refs.audio.volume = 0.5
+      })
     },
     computed: {
       volume: {
@@ -380,6 +378,7 @@
         .play-control {
           position: relative;
           .van-circle {
+            position: absolute;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -395,7 +394,7 @@
               height: 48px;
             }
           }
-          .van-image,
+
           .van-icon {
             position: absolute;
           }
@@ -424,6 +423,10 @@
       }
     }
     .van-action-sheet {
+      h2,
+      p {
+        color: #000;
+      }
       max-height: 90%;
       .van-action-sheet__item {
         height: 60px;
