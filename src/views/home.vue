@@ -10,13 +10,18 @@
     <van-nav-bar class="fixed-nav" left-arrow />
     <!-- 标题栏2 -->
     <van-sticky @scroll="scroll">
-      <van-nav-bar class="" :border="false" left-arrow :style="{ opacity: scrollTop / 250 }">
+      <van-nav-bar
+        class=""
+        :border="false"
+        left-arrow
+        :style="{ opacity: scrollTop > 1000 ? 1 : scrollTop / 250 }"
+      >
         <template #title>
           <p
             @click="onClick"
             :style="{
-              opacity: (scrollTop - 150) / 50,
-              transform: 'translateY(' + 80 / (scrollTop - 150) + 'px)'
+              opacity: scrollTop > 1000 ? 1 : (scrollTop - 150) / 50,
+              transform: scrollTop > 1000 ? 'none' : 'translateY(' + 80 / (scrollTop - 150) + 'px)'
             }"
           >
             已点赞的歌曲
@@ -30,7 +35,7 @@
       show-action
       shape="round"
       placeholder="请输入搜索关键词"
-      :style="{ opacity: 1 - (scrollTop - 5) / 25 }"
+      :style="{ opacity: scrollTop > 1000 ? 0 : 1 - (scrollTop - 5) / 25 }"
     >
       <template #action>
         <!-- <div @click="onSearch">搜索</div> -->
@@ -38,7 +43,10 @@
       </template>
     </van-search>
     <!-- 歌单信息 -->
-    <div class="page-title" :style="{ opacity: 1.1 - (scrollTop - 50) / 80 }">
+    <div
+      class="page-title"
+      :style="{ opacity: scrollTop > 1000 ? 0 : 1.1 - (scrollTop - 50) / 80 }"
+    >
       <h2>已点赞的歌曲</h2>
       <p>{{ total.toLocaleString() }} 首歌曲</p>
     </div>
@@ -435,5 +443,6 @@
         height: 60px;
       }
     }
+    
   }
 </style>
