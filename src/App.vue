@@ -10,6 +10,7 @@
         <van-icon name="play" size="34px" />
       </div>
     </div>
+    <AudioPlayer></AudioPlayer>
     <van-tabbar v-model="active">
       <van-tabbar-item replace to="/home" icon="home-o">主页</van-tabbar-item>
       <van-tabbar-item replace to="/search" icon="search">搜索</van-tabbar-item>
@@ -19,7 +20,12 @@
 </template>
 
 <script>
+  import AudioPlayer from "./components/audio-player.vue"
   export default {
+    name: "App",
+    components: {
+      AudioPlayer
+    },
     created() {
       // 如果本地有token,配置给api模块
       if (localStorage.getItem("vant_spotify_token")) {
@@ -30,8 +36,6 @@
         location.href = "http://localhost:8888"
       }
     },
-    name: "App",
-    components: {},
     data() {
       return {
         active: 0
