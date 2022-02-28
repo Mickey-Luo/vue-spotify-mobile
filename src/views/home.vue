@@ -56,7 +56,7 @@
       image-size="50px"
     /> -->
     <!-- 播放器 -->
-    <audio
+    <!-- <audio
       ref="audio"
       src="https://p.scdn.co/mp3-preview/faba31300045dcff51050ee0d6a6e2d51b55aed4?cid=e1e7445863f4451b87848d1850d31010"
       preload
@@ -64,9 +64,9 @@
       id="audio"
       muted
       @timeupdate="timeupdate"
-    ></audio>
+    ></audio> -->
     <!-- 音量条 -->
-    <p><van-slider v-model="volume" /></p>
+    <!-- <p><van-slider v-model="volume" /></p> -->
     <!-- 曲目列表 -->
     <div class="track-list-container">
       <van-list
@@ -84,7 +84,14 @@
           v-lazy="item.track.album.images[1].url"
           :key="item.track.id"
           clickable
-          @click="play(item.track.preview_url, item.track.id)"
+          @click="
+            play({
+              url: item.track.preview_url,
+              id: item.track.id,
+              name: item.track.name,
+              artists: item.track.artists
+            })
+          "
         >
           <van-row class="track-item-flexbox" type="flex">
             <!-- 曲目封面 -->
@@ -98,7 +105,7 @@
               </van-col>
               <!-- 圆环 -->
               <van-circle
-                v-if="playPromise && playingId === item.track.id"
+                v-if="isPlaying && playingId === item.track.id"
                 :stroke-width="70"
                 v-model="currentTime"
                 layer-color="#fff"
@@ -111,7 +118,7 @@
                 <!-- 加载图标 -->
                 <van-loading
                   :style="{
-                    visibility: playPromise && inQueueId === item.track.id ? 'visible' : 'hidden'
+                    visibility: isPlaying && inQueueId === item.track.id ? 'visible' : 'hidden'
                   }"
                 />
               </van-circle>
@@ -164,6 +171,7 @@
 </template>
 
 <script>
+  import EventBus from "../utils/EventBus"
   export default {
     name: "home",
     data() {
@@ -186,10 +194,9 @@
         total: 0,
         counter: 0,
         // 进度圈
-        currentRate: 0,
         currentTime: 0,
         defaultVolume: 50,
-        playPromise: null,
+        // playPromise: null,
         isPlaying: false,
         showName: "",
         showArtists: [],
@@ -204,8 +211,6 @@
     },
     methods: {
       onLoad() {
-        // 异步获取歌曲列表
-
         console.log("获取歌曲列表！")
         this.$spotifyApi.getMySavedTracks({ offset: this.offset, limit: 40 }, (err, data) => {
           if (err) {
@@ -245,7 +250,7 @@
       scroll(e) {
         this.scrollTop = e.scrollTop
       },
-      // 绑定双击方法
+      // 绑定双击方法，用于双击标题栏时页面回到顶部
       onClick() {
         this.counter++
         if (this.counter == 1) {
@@ -262,87 +267,20 @@
           behavior: "smooth"
         })
       },
-      // 点击歌曲单元：
-      play(url, id) {
-        const audio = this.$refs.audio
-        // // 如果正在播放，
-        // if (this.playPromise) {
-
-        // 如果点击的是同一首曲子
-        if (this.playingId === id) {
-          if (this.isPlaying) {
-            // 暂停并准备
-            audio.pause()
-            this.isPlaying = false
-          } else {
-            this.playPromise = audio.play()
-            this.isPlaying = true
-          }
-        } else {
-          // 如果是不同的曲子，先设置inQueueId和Url
-          this.inQueueId = id
-          this.inQueueUrl = url
-          // 如果已经准备好了, 用inQueueId播放
-          if (this.ready) {
-            this.ready = false
-            audio.pause()
-            audio.src = this.inQueueUrl
-            this.playPromise = audio.play()
-            this.playPromise.then(() => {
-              // 播放完成后
-              this.isPlaying = true
-              this.afterPlay()
-            })
-          }
-        }
-      },
-      afterPlay() {
-        const audio = this.$refs.audio
-        // 如果有inQueueId，接着播放inQueue
-        if (this.inQueueId) {
-          audio.src = this.inQueueUrl
-          this.playPromise = audio.play()
-          this.playPromise.then(() => {
-            // 播放完成后准备
-            this.playingId = this.inQueueId
-            this.inQueueId = ""
-            this.inQueueUrl = ""
-            this.ready = true
-          })
-        } else {
-          // 没有Queue直接准备
-          this.ready = true
-          this.playingId = this.inQueueId
-        }
-      },
-      timeupdate(e) {
-        // console.log(e)
-        this.currentTime = e.target.currentTime * 3.3
-      },
-      showFn(name, artists, album) {
-        this.showName = name
-        this.showArtists = artists.map((v) => {
-          console.log(v)
-          return v.name
-        })
-        this.showAlbum = album
+      play(order) {
+        EventBus.$emit("playOrder", order)
+        this.playingId = order.id
       }
     },
     mounted() {
-      this.$nextTick(function () {
-        this.$refs.audio.volume = 0.5
+      // 获得圆环进度
+      EventBus.$on("currentTime", (time) => {
+        this.currentTime = time
       })
-    },
-    computed: {
-      volume: {
-        get() {
-          return this.defaultVolume
-        },
-        set(val) {
-          this.$refs.audio.volume = val / 100
-          this.defaultVolume = val
-        }
-      }
+      // 获得播放状态
+      EventBus.$on("playState", (isPlaying) => {
+        this.isPlaying = isPlaying
+      })
     }
   }
 </script>
@@ -350,9 +288,8 @@
 <style lang="less">
   .page-title {
     & > * {
-      margin: 10px 0;
       box-sizing: border-box;
-      margin: 0 14px;
+      margin: 16px 16px;
     }
     p {
       color: #666;
@@ -443,6 +380,5 @@
         height: 60px;
       }
     }
-    
   }
 </style>
