@@ -1,6 +1,6 @@
 <template>
   <div>
-    <audio ref="audio" src="" preload loop id="audio" muted @timeupdate="timeUpdate"></audio>
+    <audio ref="audio" src="" preload loop id="audio" @timeupdate="timeUpdate"></audio>
     <!-- 音量条 -->
     <!-- <p><van-slider v-model="volume" /></p> -->
   </div>
