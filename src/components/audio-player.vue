@@ -41,11 +41,11 @@
           EventBus.$emit("playState", boolean)
           this.$nextTick(() => {
             this.$emit("playState", {
-              url: this.playingUrl_local,
-              id: this.playingId_local,
-              name: this.playingName_local,
-              artists: this.playingArtists_local,
-              isPlaying: this.isPlaying_local
+              url: this.playingUrl,
+              id: this.playingId,
+              name: this.playingName,
+              artists: this.playingArtists,
+              isPlaying: boolean
             })
           })
         }
@@ -57,39 +57,6 @@
         set(id) {
           this.inQueueId_local = id
           EventBus.$emit("queue", id)
-        }
-      },
-      // note: 可能要清除的代码,命名也可以精简
-      playingName: {
-        get() {
-          return this.playingName_local
-        },
-        set(val) {
-          this.playingName_local = val
-        }
-      },
-      playingId: {
-        get() {
-          return this.playingId_local
-        },
-        set(val) {
-          this.playingId_local = val
-        }
-      },
-      playingUrl: {
-        get() {
-          return this.playingUrl_local
-        },
-        set(val) {
-          this.playingUrl_local = val
-        }
-      },
-      playingArtists: {
-        get() {
-          return this.playingArtists_local
-        },
-        set(arr) {
-          this.playingArtists_local = arr
         }
       },
       volume: {
@@ -170,7 +137,7 @@
         order.artists = order.artists.map((v) => {
           return v.name
         })
-        this.play(order.url, order.id, order.name, order.artists)
+        this.play(order.url, order.id, order.name, order.artists, order.album)
       })
     }
   }

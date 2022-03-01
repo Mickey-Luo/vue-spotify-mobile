@@ -72,7 +72,8 @@
               url: item.track.preview_url,
               id: item.track.id,
               name: item.track.name,
-              artists: item.track.artists
+              artists: item.track.artists,
+              album: item.track.album
             })
           "
         >
