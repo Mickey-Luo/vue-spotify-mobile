@@ -20,7 +20,7 @@
         showArtists: [],
         showAlbum: "",
         playingId_local: "",
-        playingName_local: "Vant-Spotify",
+        playingName_local: "Vue-Spotify-Mobile",
         playingUrl_local: "",
         playingArtists_local: [],
         playingAlbum_local: [],

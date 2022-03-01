@@ -1,4 +1,4 @@
-# vant-spotify
+# vue-spotify-mobile
 
 ## Project setup
 ```
