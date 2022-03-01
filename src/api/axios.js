@@ -1,6 +1,6 @@
 import axios from "axios"
 
-const url = "http://localhost:8888"
+const url = "http://124.221.148.61:8000"
 
 export function refreshToken() {
   axios(url + "/refresh_token", {
