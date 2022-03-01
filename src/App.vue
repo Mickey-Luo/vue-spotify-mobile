@@ -20,7 +20,7 @@
     mounted() {
       // 如果本地有token,配置给api模块
       this.$nextTick(() => {
-        if (!this.$route.path.startsWith("/get-token")) {
+        setInterval(() => {
           if (localStorage.getItem("vant_spotify_token")) {
             console.log("已经获得token")
             this.$spotifyApi.setAccessToken(localStorage.getItem("vant_spotify_token"))
@@ -29,7 +29,7 @@
             console.log("没有获得token")
             location.href = "http://124.221.148.61:8000"
           }
-        }
+        }, 3000)
       })
     },
     beforeUpdate() {
