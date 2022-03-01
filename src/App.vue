@@ -17,7 +17,7 @@
     components: {
       "player-controls": PlayerControls
     },
-    created() {
+    mounted() {
       // 如果本地有token,配置给api模块
       if (!this.$route.path.startsWith("/get-token"))
         if (localStorage.getItem("vant_spotify_token")) {
@@ -26,7 +26,7 @@
         } else {
           // 如果都没有token,跳转到认证页面
           console.log("没有获得token")
-          // location.href = "http://124.221.148.61:8000"
+          location.href = "http://124.221.148.61:8000"
         }
     },
     beforeUpdate() {
