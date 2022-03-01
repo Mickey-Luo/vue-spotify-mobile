@@ -12,7 +12,7 @@
     name: "AudioPlayer",
     data() {
       return {
-        currentTime: 0,
+        currentRate: 0,
         defaultVolume: 50,
         playPromise: null,
         isPlaying_local: false,
@@ -45,6 +45,7 @@
               id: this.playingId,
               name: this.playingName,
               artists: this.playingArtists,
+              album: this.playingAlbum,
               isPlaying: boolean
             })
           })
@@ -71,7 +72,7 @@
     },
 
     methods: {
-      play(url, id, name, artists) {
+      play(url, id, name, artists, album) {
         const audio = this.$refs.audio
         // 如果点击的是同一首曲子并且准备好了
         if (this.playingId === id && this.ready) {
@@ -96,12 +97,12 @@
             this.playPromise.then(() => {
               // 播放完成后
               this.isPlaying = true
-              this.afterPlay(url, id, name, artists)
+              this.afterPlay(url, id, name, artists, album)
             })
           }
         }
       },
-      afterPlay(url, id, name, artists) {
+      afterPlay(url, id, name, artists, album) {
         const audio = this.$refs.audio
         // 如果有inQueueId，接着播放Queue
         if (this.inQueueId) {
@@ -123,10 +124,14 @@
         this.playingId = id
         this.playingName = name
         this.playingArtists = artists
+        this.playingAlbum = album
       },
       timeUpdate(e) {
-        let time = e.target.currentTime * 3.3
-        EventBus.$emit("currentTime", time)
+        if (this.isPlaying) {
+          let rate = e.target.currentTime * 3.3
+          EventBus.$emit("currentRate", rate)
+          this.$emit("currentRate", rate)
+        }
       }
     },
     mounted() {

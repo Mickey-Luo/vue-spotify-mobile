@@ -46,10 +46,8 @@
   } */
   .van-tabbar {
     height: 60px;
-    background-color: #fff;
-
-    background: linear-gradient(transparent -350%, rgb(255, 255, 255) 60%);
-
+    background: linear-gradient(transparent -500%, rgb(255, 255, 255) 60%);
+    border: none;
     .van-tabbar-item--active {
       background: none;
     }

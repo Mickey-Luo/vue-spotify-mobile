@@ -11,6 +11,7 @@ Vue.prototype.$spotifyApi = spotifyApi
 
 // Vant
 import {
+  Progress,
   Slider,
   Circle,
   Search,
@@ -34,6 +35,7 @@ import {
   Image as VanImage
 } from "vant"
 
+Vue.use(Progress)
 Vue.use(Slider)
 Vue.use(Circle)
 Vue.use(Search)

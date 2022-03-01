@@ -91,7 +91,7 @@
               <van-circle
                 v-if="playingId === item.track.id || inQueueId == item.track.id"
                 :stroke-width="70"
-                v-model="currentTime"
+                v-model="currentRate"
                 layer-color="#fff"
                 color="#1fd760"
                 :rate="0"
@@ -146,8 +146,8 @@
           <van-image
             :src="showAlbum && showAlbum.images[0].url"
             fit="cover"
-            height="128"
-            width="128"
+            height="256"
+            width="256"
             ><template v-slot:loading>
               <van-loading type="spinner" />
             </template>
@@ -184,7 +184,7 @@
         total: 0,
         counter: 0,
         // 进度圈
-        currentTime: 0,
+        currentRate: 0,
         defaultVolume: 50,
         // playPromise: null,
         isPlaying: false,
@@ -231,7 +231,7 @@
             // 请求完后，曲目开始数后移40位
             this.offset += 40
             // 数据全部加载完成
-            if (data.length < 2) {
+            if (data.length < 40) {
               this.finished = true
             }
           }
@@ -273,8 +273,8 @@
     },
     mounted() {
       // 获得圆环进度
-      EventBus.$on("currentTime", (time) => {
-        this.currentTime = time
+      EventBus.$on("currentRate", (time) => {
+        this.currentRate = time
       })
       // 获得播放状态
       EventBus.$on("playState", (isPlaying) => {
@@ -319,9 +319,7 @@
       height: 80px;
       .track-item-flexbox {
         flex-wrap: nowrap;
-        // .track-image {
-        //   width: 70px;
-        // }
+
         height: 68px;
         .play-control {
           position: relative;
@@ -349,10 +347,11 @@
         }
 
         .track-detail {
-          padding-left: 14px;
+          padding-left: 10px;
           flex: 1;
           .track-name {
             font-weight: 500;
+            line-height: 17px;
           }
           .artist-name-container {
             opacity: 0.6;
