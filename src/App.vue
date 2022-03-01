@@ -25,7 +25,8 @@
           this.$spotifyApi.setAccessToken(localStorage.getItem("vant_spotify_token"))
         } else {
           // 如果都没有token,跳转到认证页面
-          location.href = "http://124.221.148.61:8000"
+          console.log("没有获得token")
+          // location.href = "http://124.221.148.61:8000"
         }
     },
     beforeUpdate() {
