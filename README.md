@@ -1,4 +1,6 @@
 # vue-spotify-mobile
+（开发中）
+使用spotify提供的教程搭建认证服务器，获取access_token即可运行
 
 ## Project setup
 ```
