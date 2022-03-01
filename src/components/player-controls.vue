@@ -9,7 +9,7 @@
       </div>
       <div class="track-detail">
         <p class="name van-ellipsis">{{ state.name }}</p>
-        <p class="artists van-ellipsis">{{ state.artists.join("·") }}</p>
+        <p class="artists van-ellipsis">{{ state.artists.join(" · ") }}</p>
       </div>
       <div class="play-button">
         <van-icon v-if="!state.isPlaying" @click.stop="play" name="play" size="28px" />

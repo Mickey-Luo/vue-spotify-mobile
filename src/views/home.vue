@@ -50,7 +50,7 @@
       <h2>已点赞的歌曲</h2>
       <p>{{ total.toLocaleString() }} 首歌曲</p>
     </div>
-
+    <!-- 歌单 list -->
     <div class="track-list-container">
       <van-list
         ref="list"
@@ -68,13 +68,15 @@
           :key="item.track.id"
           clickable
           @click="
-            play({
-              url: item.track.preview_url,
-              id: item.track.id,
-              name: item.track.name,
-              artists: item.track.artists,
-              album: item.track.album
-            })
+            item.track.preview_url
+              ? play({
+                  url: item.track.preview_url,
+                  id: item.track.id,
+                  name: item.track.name,
+                  artists: item.track.artists,
+                  album: item.track.album
+                })
+              : ''
           "
         >
           <van-row class="track-item-flexbox" type="flex">
@@ -114,7 +116,10 @@
               </van-circle>
             </div>
             <!-- 曲目信息 -->
-            <van-col class="track-detail van-ellipsis">
+            <van-col
+              class="track-detail van-ellipsis"
+              :class="{ unavailable: !item.track.preview_url }"
+            >
               <span class="track-name">{{ item.track.name }}</span>
               <div class="artist-name-container van-ellipsis">
                 <span class="artist-name" v-for="item in item.track.artists" :key="item.id">
@@ -167,9 +172,9 @@
     data() {
       return {
         mySavedTracks: {},
+        // list组件参数
         list: [],
         offset: 0,
-        // list组件参数
         loading: false,
         finished: false,
         // 滚动距离
@@ -183,10 +188,10 @@
         searchValue: "",
         total: 0,
         counter: 0,
-        // 进度圈
+        timer: 0,
+        // 播放相关
         currentRate: 0,
         defaultVolume: 50,
-        // playPromise: null,
         isPlaying: false,
         showName: "",
         showArtists: [],
@@ -310,76 +315,79 @@
     }
   }
   .track-list-container {
-    padding-bottom: 50px;
-  }
-  .track-list {
-    .track-item {
-      padding-top: 6px;
-      padding-bottom: 6px;
-      height: 80px;
-      .track-item-flexbox {
-        flex-wrap: nowrap;
+    padding: 60px 0;
+    .track-list {
+      .track-item {
+        padding-top: 6px;
+        padding-bottom: 6px;
+        height: 80px;
+        .track-item-flexbox {
+          flex-wrap: nowrap;
 
-        height: 68px;
-        .play-control {
-          position: relative;
-          .van-circle {
-            position: absolute;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            width: 68px;
-            height: 68px;
-            background-color: #0006;
-            svg {
+          height: 68px;
+          .play-control {
+            position: relative;
+            .van-circle {
               position: absolute;
-              left: 50%;
-              top: 50%;
-              transform: translate(-50%, -50%);
-              width: 48px;
-              height: 48px;
+              display: flex;
+              justify-content: center;
+              align-items: center;
+              width: 68px;
+              height: 68px;
+              background-color: #0006;
+              svg {
+                position: absolute;
+                left: 50%;
+                top: 50%;
+                transform: translate(-50%, -50%);
+                width: 48px;
+                height: 48px;
+              }
+            }
+
+            .van-icon {
+              position: absolute;
             }
           }
 
-          .van-icon {
-            position: absolute;
-          }
-        }
-
-        .track-detail {
-          padding-left: 10px;
-          flex: 1;
-          .track-name {
-            font-weight: 500;
-            line-height: 17px;
-          }
-          .artist-name-container {
-            opacity: 0.6;
-            .artist-name + .artist-name::before {
-              content: "·";
+          .track-detail {
+            padding-left: 10px;
+            flex: 1;
+            &.unavailable {
+              color: #aaa;
+            }
+            .track-name {
+              font-weight: 500;
+              line-height: 17px;
+            }
+            .artist-name-container {
+              opacity: 0.6;
+              .artist-name + .artist-name::before {
+                content: "·";
+              }
             }
           }
+          .van-button {
+            align-self: center;
+            border: none;
+            height: 48px;
+            width: 48px;
+            background-color: #fff0;
+          }
         }
-        .van-button {
-          align-self: center;
-          border: none;
-          height: 48px;
-          width: 48px;
-          background-color: #fff0;
+      }
+      .van-action-sheet {
+        h2,
+        p {
+          color: #000;
         }
-      }
-    }
-    .van-action-sheet {
-      h2,
-      p {
-        color: #000;
-      }
-      max-height: 90%;
-      .van-action-sheet__item {
-        height: 60px;
-      }
-      .van-action-sheet__cancel {
-        height: 60px;
+        max-height: 90%;
+        .van-action-sheet__item {
+          height: 60px;
+        }
+        .van-action-sheet__cancel {
+          height: 60px;
+        }
       }
     }
   }

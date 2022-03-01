@@ -27,9 +27,20 @@
         location.href = "http://localhost:8888"
       }
     },
+    beforeUpdate() {
+      if (this.$route.path.startsWith("/home")) {
+        this.active = 0
+      }
+      if (this.$route.path.startsWith("/search")) {
+        this.active = 1
+      }
+      if (this.$route.path.startsWith("/user")) {
+        this.active = 2
+      }
+    },
     data() {
       return {
-        active: 0
+        active: null
       }
     }
   }
