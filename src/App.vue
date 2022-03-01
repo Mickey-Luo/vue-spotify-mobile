@@ -48,7 +48,7 @@
     height: 60px;
     background-color: #fff;
 
-    background: linear-gradient(transparent -300%, rgb(255, 255, 255) 80%);
+    background: linear-gradient(transparent -350%, rgb(255, 255, 255) 60%);
 
     .van-tabbar-item--active {
       background: none;
