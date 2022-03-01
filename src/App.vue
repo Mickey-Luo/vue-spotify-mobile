@@ -17,10 +17,10 @@
     components: {
       "player-controls": PlayerControls
     },
-    mounted() {
+    created() {
       // 如果本地有token,配置给api模块
       this.$nextTick(() => {
-        setInterval(() => {
+        setTimeout(() => {
           if (localStorage.getItem("vant_spotify_token")) {
             console.log("已经获得token")
             this.$spotifyApi.setAccessToken(localStorage.getItem("vant_spotify_token"))
