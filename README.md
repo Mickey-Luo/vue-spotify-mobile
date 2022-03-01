@@ -1,1 +1,1 @@
-# vant-spotify
+# vue-spotify-mobile
