@@ -63,6 +63,12 @@ Vue.use(VanImage)
 // VueRouter
 import router from "./router/index"
 
+// Scroller
+import { RecycleScroller } from "vue-virtual-scroller"
+
+Vue.component("RecycleScroller", RecycleScroller)
+import "vue-virtual-scroller/dist/vue-virtual-scroller.css"
+
 new Vue({
   router,
   render: (h) => h(App)

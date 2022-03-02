@@ -52,19 +52,15 @@
     </div>
     <!-- 歌单 list -->
     <div class="track-list-container">
-      <van-list
-        ref="list"
-        class="track-list"
-        v-model="loading"
-        :finished="finished"
-        finished-text="没有更多了"
-        @load="onLoad"
+      <RecycleScroller
+        class="scroller"
+        :items="list"
+        :item-size="80"
+        key-field="track"
+        v-slot="{ item }"
       >
-        <!-- 曲目单元 -->
         <van-cell
           class="track-item"
-          v-for="item in list"
-          v-lazy="item.track.album.images[1].url"
           :key="item.track.id"
           clickable
           @click="
@@ -137,7 +133,19 @@
             ></van-button>
           </van-row>
         </van-cell>
+      </RecycleScroller>
+      <van-list
+        ref="list"
+        class="track-list"
+        v-model="loading"
+        :finished="finished"
+        finished-text="没有更多了"
+        @load="onLoad"
+      >
+        <!-- 曲目单元 -->
+        <br />
       </van-list>
+
       <!-- 动作面板 -->
       <van-action-sheet
         v-model="show"
@@ -174,6 +182,7 @@
         mySavedTracks: {},
         // list组件参数
         list: [],
+        mylist: [{ id: 1 }, { id: 2 }, { id: 3 }],
         offset: 0,
         loading: false,
         finished: false,
