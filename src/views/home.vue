@@ -206,6 +206,7 @@
     },
     methods: {
       onLoad() {
+        // 如果没有在使用AccessToken，不执行
         if (!this.$spotifyApi.getAccessToken()) return
         console.log("获取歌曲列表！")
         this.$spotifyApi.getMySavedTracks({ offset: this.offset, limit: 40 }, (err, data) => {
@@ -214,10 +215,8 @@
             // console.error(err)
             // 如果token过期
             // if (err.status === 401) alert("token过期")
-            // 获取新token
+            // 刷新token
             this.$spotifyApi.refreshToken()
-            // 重新设置token
-            this.$spotifyApi.setAccessToken(localStorage.getItem("vant_spotify_token"))
 
             // 加载状态结束
             this.loading = false
