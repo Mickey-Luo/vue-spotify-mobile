@@ -221,6 +221,7 @@
 
             // 加载状态结束
             this.loading = false
+            return this.$spotifyApi.setAccessToken(null)
           } else {
             // ✅ 成功
             console.log("歌曲列表", data)
