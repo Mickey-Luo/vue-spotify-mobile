@@ -206,6 +206,7 @@
     },
     methods: {
       onLoad() {
+        if (!this.$spotifyApi.getAccessToken()) return
         console.log("获取歌曲列表！")
         this.$spotifyApi.getMySavedTracks({ offset: this.offset, limit: 40 }, (err, data) => {
           if (err) {

@@ -5,8 +5,7 @@ Vue.config.productionTip = false
 
 // spotifyApi
 import spotifyApi from "@/api/spotifyApi"
-import { refreshToken } from "@/api/axios"
-spotifyApi.refreshToken = refreshToken
+
 Vue.prototype.$spotifyApi = spotifyApi
 
 // Vant

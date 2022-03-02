@@ -7,7 +7,10 @@ Vue.use(VueRouter)
 const routes = [
   {
     path: "/get-token/:access_token/:refresh_token",
-    component: () => import("../views/get-token.vue")
+    redirect: (to) => {
+      const { params } = to
+      return { name: "home", params }
+    }
   },
   {
     path: "/",
@@ -15,14 +18,17 @@ const routes = [
   },
   {
     path: "/home",
+    name: "home",
     component: () => import("../views/home.vue")
   },
   {
     path: "/search",
+    name: "search",
     component: () => import("../views/search.vue")
   },
   {
     path: "/user",
+    name: "user",
     component: () => import("../views/user.vue")
   }
 ]

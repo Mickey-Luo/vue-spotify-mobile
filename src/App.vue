@@ -12,26 +12,35 @@
 
 <script>
   import PlayerControls from "@/components/player-controls.vue"
+
   export default {
     name: "App",
     components: {
       "player-controls": PlayerControls
     },
-    created() {
-      // 如果本地有token,配置给api模块
-      this.$nextTick(() => {
-        setTimeout(() => {
-          if (localStorage.getItem("vant_spotify_token")) {
-            console.log("已经获得token")
-            this.$spotifyApi.setAccessToken(localStorage.getItem("vant_spotify_token"))
-          } else {
-            // 如果都没有token,跳转到认证页面
-            console.log("没有获得token")
+    updated() {
+      // 如果传参数
+      if (this.$route.params.refresh_token) {
+        console.log("获取了传入token")
+        console.log(this.$route.params)
+        const { access_token, refresh_token } = this.$route.params
+        this.$spotifyApi.setAccessToken(access_token)
+        this.$spotifyApi.saveTokens(access_token, refresh_token)
+      } else {
+        // 如果本地有token,配置给api模块
+        const { access_token, refresh_token } = this.$spotifyApi.getTokens()
+        if (access_token && refresh_token) {
+          console.log("获取了本地token")
+          this.$spotifyApi.setAccessToken(access_token)
+        } else {
+          setTimeout(() => {
+            alert("跳转到登录认证页面")
             location.href = "http://124.221.148.61:8000"
-          }
-        }, 3000)
-      })
+          }, 1000)
+        }
+      }
     },
+    // 实时更新tabbar高亮图标
     beforeUpdate() {
       if (this.$route.path.startsWith("/home")) {
         this.active = 0
@@ -43,6 +52,7 @@
         this.active = 2
       }
     },
+
     data() {
       return {
         active: null
