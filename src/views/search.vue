@@ -184,7 +184,7 @@
               // 获取新token
               this.$spotifyApi.refreshToken()
               // 重新设置token
-              this.$spotifyApi.setAccessToken(localStorage.getItem("vant_spotify_token"))
+              this.$spotifyApi.setAccessToken(localStorage.getItem("vue_spotify_token"))
 
               // 加载状态结束
               this.loading = false

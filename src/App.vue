@@ -34,9 +34,8 @@
           this.$spotifyApi.setAccessToken(access_token)
         } else {
           setTimeout(() => {
-            alert("跳转到登录认证页面")
             this.$spotifyApi.goAuth()
-          }, 1000)
+          }, 500)
         }
       }
     },
