@@ -26,6 +26,9 @@ const TokenTools = {
       access_token: localStorage.getItem("vant_spotify_token"),
       refresh_token: localStorage.getItem("vant_spotify_refresh_token")
     }
+  },
+  goAuth() {
+    location.href = url
   }
 }
 

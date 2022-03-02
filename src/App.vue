@@ -35,7 +35,7 @@
         } else {
           setTimeout(() => {
             alert("跳转到登录认证页面")
-            location.href = "http://124.221.148.61:8000"
+            this.$spotifyApi.goAuth()
           }, 1000)
         }
       }
