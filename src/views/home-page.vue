@@ -1,78 +1,45 @@
 <template>
   <div id="home-page">
-    <!-- <van-row type="flex" justify="space-between">
-      <van-col span="6">晚上好</van-col>
-      <van-col span="6"><van-icon name="bullhorn-o" /><van-icon name="clock-o" /><van-icon name="setting-o" /></van-col>
-    </van-row> -->
-    <van-list ref="list" class="track-list" v-model="loading" :finished="finished" finished-text="没有更多了" @load="onLoad"> </van-list>
-    <div class="grid-container">
-      <div class="grid">
-        <div class="grid-item" v-for="(item, index) in list" :key="index" @click="go('tracklist', item.id)">
-          <van-image :src="item.images[0].url" />
-          <p v-html="item.description" class="van-multi-ellipsis--l2"></p>
-        </div>
-      </div>
-      <!-- <button @click="go('tracklist', item.id)">{{ item.name }}{{ item.id }}</button> -->
+    <van-row class="top" type="flex" justify="space-between">
+      <van-col class="welcome" span="9"><p>晚上好</p></van-col>
+      <van-col class="icons" span="9"
+        ><van-icon name="bullhorn-o" size="30" /><van-icon name="clock-o" size="30" /><van-icon name="setting-o" size="30"
+      /></van-col>
+    </van-row>
+    <div class="grid" clickable>
+      <div class="grid-item" @click="go('saved-page')"><van-icon name="like" size="18px" />已点赞的歌</div>
+      <div class="grid-item" @click="go('saved-page')"><van-icon name="like" size="18px" />已点赞的歌</div>
+      <div class="grid-item" @click="go('saved-page')"><van-icon name="like" size="18px" />已点赞的歌</div>
+      <div class="grid-item" @click="go('saved-page')"><van-icon name="like" size="18px" />已点赞的歌</div>
     </div>
+    <!-- 列表 -->
+    <list-scroll v-for="(playlists, index) in listCollection" :key="index" :playlists="playlists" @go="go"></list-scroll>
   </div>
 </template>
 
 <script>
+  import listScroll from "../components/list-scroll.vue"
   export default {
     name: "home-page",
+    components: {
+      "list-scroll": listScroll,
+    },
     data() {
       return {
-        // list组件参数
-        list: [],
-        offset: 0,
-        loading: false,
-        finished: false,
         // 滚动距离
         scrollTop: 0,
+        listCollection: [],
       }
     },
     methods: {
+      // 导航
       go(dest, playlistId) {
         this.$emit("go", dest, playlistId)
       },
       backward() {
         this.$emit("backward")
       },
-      onLoad() {
-        console.log(1)
-        // 如果没有在使用AccessToken，不执行
-        if (!this.$spotifyApi.getAccessToken()) return
-        console.log("获取歌曲列表！")
-        this.$spotifyApi.getFeaturedPlaylists({ country: "JP", limit: 10, locale: "zh_CN", offset: this.offset }, (err, data) => {
-          if (err) {
-            console.error(err)
-            // 如果token过期
-            if (err.status === 401) this.$spotifyApi.goAuth()
-            // 刷新token
-            this.$spotifyApi.refreshToken()
-            // 加载状态结束
-            this.loading = false
-            return this.$spotifyApi.setAccessToken(null)
-          } else {
-            // ✅ 成功
-            console.log("歌曲列表", data.playlists)
-            const playlists = data.playlists
-            // 添加数据到数组
-            this.list.push(...playlists.items)
-
-            // 加载状态结束
-            this.loading = false
-
-            // 请求完后，曲目开始数后移40位
-            this.offset += 10
-            // 数据全部加载完成
-            if (playlists.items.length < 10) {
-              console.log("加载了整个列表")
-              this.finished = true
-            }
-          }
-        })
-      },
+      // 获取滚动距离
       scroll() {
         this.scrollTop = this.$refs.tracklist.scrollTop <= 1000 ? this.$refs.tracklist.scrollTop : 1000
       },
@@ -94,37 +61,65 @@
         })
       },
     },
+    mounted() {
+      this.$nextTick(() => {
+        function wait(ms) {
+          return new Promise((resolve) => {
+            setTimeout(() => {
+              resolve(ms)
+            }, ms)
+          })
+        }
+        this.$spotifyApi.getCategories({ country: "JP", limit: 22, locale: "zh_CN", offset: 0 }, async (err, data) => {
+          if (!err) console.log(data)
+          // 获得了歌单列表，开始请求歌单
+          for (const v of data.categories.items) {
+            await wait(100)
+            this.$spotifyApi.getCategoryPlaylists(v.id, { country: "JP", limit: 10, offset: 0 }, (err, data) => {
+              if (!err) {
+                console.log(data)
+                data.playlists.name = v.name
+                this.listCollection.push(data.playlists)
+              }
+            })
+          }
+        })
+      })
+    },
   }
 </script>
 
 <style lang="less" scoped>
-  .grid-container {
-    width: 100%;
-    height: 190px;
-    overflow: hidden;
-    .grid {
-      height: 100%;
-      overflow: auto;
-      display: flex;
-      justify-content: start;
-      gap: 15px;
-      padding: 0 15px;
-      -ms-overflow-style: none; /* IE and Edge */
-      scrollbar-width: none; /* Firefox */
-      &::-webkit-scrollbar {
-        display: none;
-      }
-      .grid-item {
-        display: flex;
-        flex-direction: column;
-        gap: 4px;
-        font-size: 14px;
-        font-weight: 300;
+  .top {
+    padding: 55px 18px 0;
+    .welcome {
+      font-size: 24px;
+      font-weight: 500;
+    }
+    .icons {
+      text-align: right;
+    }
+  }
+  .grid {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px;
+    height: 120px;
+    margin: 20px 0;
 
-        .van-image {
-          width: 140px;
-          height: 140px;
-        }
+    .grid-item {
+      width: 44%;
+      height: 50px;
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      justify-content: center;
+      background-color: #f2f2f2f9;
+      border-radius: 8px;
+
+      &:active {
+        background-color: #e6e6e6;
       }
     }
   }

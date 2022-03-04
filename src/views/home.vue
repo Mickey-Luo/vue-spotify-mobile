@@ -12,11 +12,13 @@
 <script>
   // import EventBus from "../utils/EventBus"
   import tracklist from "../components/tracklist.vue"
+  import savedPage from "../views/saved-page.vue"
   import homePage from "./home-page.vue"
   export default {
     name: "home",
     components: {
       tracklist: tracklist,
+      "saved-page": savedPage,
       "home-page": homePage,
     },
     data() {
@@ -52,6 +54,13 @@
       height: 100%;
       overflow-y: scroll;
       position: absolute;
+      padding-bottom: 120px;
+      box-sizing: border-box;
+      -ms-overflow-style: none; /* IE and Edge */
+      scrollbar-width: none; /* Firefox */
+      &::-webkit-scrollbar {
+        display: none;
+      }
     }
     // 前进
     .go-enter-active,

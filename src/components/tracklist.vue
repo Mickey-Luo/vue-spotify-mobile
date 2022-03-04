@@ -91,7 +91,7 @@
         </van-cell>
       </van-list>
       <!-- 动作面板 -->
-      <van-action-sheet v-model="show" :actions="actions" cancel-text="取消" close-on-click-action safe-area-inset-bottom>
+      <van-action-sheet v-model="show" :actions="actions" @select="onSelect" cancel-text="取消" close-on-click-action safe-area-inset-bottom>
         <template #description>
           <p></p>
           <van-image :src="showAlbum && showAlbum.images[0].url" fit="cover" height="256" width="256"
@@ -153,8 +153,15 @@
       }
     },
     methods: {
+      // 导航
+      go(dest, playlistId) {
+        this.$emit("go", dest, playlistId)
+      },
       backward() {
         this.$emit("backward")
+      },
+      onSelect(item) {
+        console.log(item)
       },
       onLoad() {
         // 如果没有在使用AccessToken，不执行
