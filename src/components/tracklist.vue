@@ -9,8 +9,8 @@
           <p
             @click="onClick"
             :style="{
-              opacity: scrollTop > 1000 ? 1 : (scrollTop - 150) / 50,
-              transform: scrollTop > 1000 ? 'none' : 'translateY(' + 80 / (scrollTop - 150) + 'px)',
+              opacity: (scrollTop - 100) / 50,
+              transform: scrollTop > 1000 ? 'none' : 'translateY(' + 80 / (scrollTop - 120) + 'px)',
             }"
           >
             {{ listName }}
@@ -19,20 +19,13 @@
       >
     </van-sticky>
     <!-- 搜索框 -->
-    <van-search
-      v-model="searchValue"
-      show-action
-      shape="round"
-      placeholder="请输入搜索关键词"
-      :style="{ opacity: scrollTop > 1000 ? 0 : 1 - (scrollTop - 5) / 25 }"
-    >
+    <van-search v-model="searchValue" show-action shape="round" placeholder="请输入搜索关键词" :style="{ opacity: 1 - (scrollTop - 5) / 25 }">
       <template #action>
-        <!-- <div @click="onSearch">搜索</div> -->
         <div>排序</div>
       </template>
     </van-search>
     <!-- 歌单信息 -->
-    <div class="page-title" :style="{ opacity: scrollTop > 1000 ? 0 : 1.1 - (scrollTop - 50) / 80 }">
+    <div class="page-title" :style="{ opacity: 1.1 - (scrollTop - 50) / 80 }">
       <h2>{{ listName }}</h2>
       <p>{{ total.toLocaleString() }} 首歌曲</p>
     </div>
@@ -78,8 +71,7 @@
                 :rate="0"
               >
                 <!-- 播放 - 暂停 -->
-                <van-icon v-if="!isPlaying && playingId === item.track.id" name="play" size="27px" color="#1fd760" />
-                <van-icon v-if="isPlaying && playingId === item.track.id" name="pause" size="27px" color="#1fd760" />
+                <van-icon v-if="isPlaying || playingId === item.track.id" :name="isPlaying ? 'pause' : 'play'" size="27px" color="#1fd760" />
                 <!-- 加载图标 -->
                 <van-loading v-if="playingId === item.track.id && inQueueId === item.track.id" />
               </van-circle>
@@ -126,17 +118,21 @@
     },
     data() {
       return {
-        // list组件参数
+        // list组件
         list: [],
         offset: 0,
         loading: false,
         finished: false,
         // 滚动距离
         scrollTop: 0,
+        // 动作面板
         show: false,
         actions: [{ name: "查看专辑", icon: "star-o" }, { name: "查看艺人" }, { name: "添加到歌单" }],
+        // 搜索栏
         searchValue: "",
+        // 歌单信息
         total: 0,
+        // 双击标题返回
         counter: 0,
         timer: 0,
         // 列表相关
@@ -162,7 +158,6 @@
       },
       onLoad() {
         // 如果没有在使用AccessToken，不执行
-        console.log(this.$spotifyApi.getAccessToken())
         if (!this.$spotifyApi.getAccessToken()) return
         console.log("获取歌曲列表！")
         this.$spotifyApi.getPlaylist(this.playlistId, {}, (err, data) => {
