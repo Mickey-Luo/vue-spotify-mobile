@@ -49,12 +49,13 @@
       display: flex;
       justify-content: start;
       gap: 15px;
-      padding: 0 15px;
+      padding: 0 170px 0 15px;
       -ms-overflow-style: none; /* IE and Edge */
       scrollbar-width: none; /* Firefox */
       &::-webkit-scrollbar {
         display: none;
       }
+      overscroll-behavior-x: contain;
       .grid-item {
         display: flex;
         flex-direction: column;
