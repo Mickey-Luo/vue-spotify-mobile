@@ -107,8 +107,8 @@
       overflow: auto;
       display: flex;
       justify-content: start;
-      gap: 20px;
-      padding: 0 20px;
+      gap: 15px;
+      padding: 0 15px;
       -ms-overflow-style: none; /* IE and Edge */
       scrollbar-width: none; /* Firefox */
       &::-webkit-scrollbar {
