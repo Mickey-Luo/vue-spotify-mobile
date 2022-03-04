@@ -16,7 +16,7 @@
   export default {
     name: "App",
     components: {
-      "player-controls": PlayerControls
+      "player-controls": PlayerControls,
     },
     updated() {
       // 如果传参数
@@ -54,14 +54,29 @@
 
     data() {
       return {
-        active: null
+        active: null,
       }
-    }
+    },
   }
 </script>
 
 <style lang="less">
+  * {
+    margin: 0;
+    padding: 0;
+  }
+  #app {
+    display: flex;
+    flex-direction: column;
+  }
+
+  #tracklist {
+    width: 100%;
+    height: 100%;
+    overflow-y: scroll;
+  }
   .van-tabbar {
+    flex: 1;
     height: 60px;
     background: linear-gradient(transparent -500%, rgb(255, 255, 255) 60%);
     border: none;

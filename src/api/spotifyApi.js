@@ -1,6 +1,6 @@
 import SpotifyWebApi from "spotify-web-api-js"
 import axios from "axios"
-const url = "http://124.221.148.61:8000"
+const baseUrl = "http://124.221.148.61:8000"
 
 // 定义Token方法
 const TokenTools = {
@@ -9,10 +9,10 @@ const TokenTools = {
     localStorage.setItem("vue_spotify_refresh_token", refresh_token)
   },
   refreshToken() {
-    axios(url + "/refresh_token", {
+    axios(baseUrl + "/refresh_token", {
       params: {
-        refresh_token: localStorage.getItem("vue_spotify_refresh_token")
-      }
+        refresh_token: localStorage.getItem("vue_spotify_refresh_token"),
+      },
     })
       .then((res) => {
         localStorage.setItem("vue_spotify_token", res.data.access_token)
@@ -24,12 +24,12 @@ const TokenTools = {
   getTokens() {
     return {
       access_token: localStorage.getItem("vue_spotify_token"),
-      refresh_token: localStorage.getItem("vue_spotify_refresh_token")
+      refresh_token: localStorage.getItem("vue_spotify_refresh_token"),
     }
   },
   goAuth() {
-    location.href = url
-  }
+    location.href = baseUrl
+  },
 }
 
 // 生成实例
