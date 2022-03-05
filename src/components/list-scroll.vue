@@ -42,13 +42,14 @@
   .grid-container {
     width: 100%;
     height: 190px;
+    margin-bottom: 18px;
     overflow: hidden;
     .grid {
       height: 100%;
       overflow: auto;
       display: flex;
       justify-content: start;
-      gap: 15px;
+      gap: 14px;
       padding: 0 170px 0 15px;
       -ms-overflow-style: none; /* IE and Edge */
       scrollbar-width: none; /* Firefox */
@@ -64,8 +65,8 @@
         font-weight: 300;
 
         .van-image {
-          width: 130px;
-          height: 130px;
+          width: 138px;
+          height: 138px;
         }
       }
     }

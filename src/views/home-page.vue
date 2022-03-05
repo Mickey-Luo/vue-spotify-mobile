@@ -70,14 +70,15 @@
             }, ms)
           })
         }
-        this.$spotifyApi.getCategories({ country: "JP", limit: 22, locale: "zh_CN", offset: 0 }, async (err, data) => {
+        this.$spotifyApi.getCategories({ country: "JP", limit: 50, locale: "zh_CN", offset: 0 }, async (err, data) => {
           if (!err) console.log(data)
           // 获得了歌单列表，开始请求歌单
           for (const v of data.categories.items) {
-            await wait(100)
-            this.$spotifyApi.getCategoryPlaylists(v.id, { country: "JP", limit: 10, offset: 0 }, (err, data) => {
+            await wait(50)
+            this.$spotifyApi.getCategoryPlaylists(v.id, { country: "JP", limit: 12, offset: 0 }, (err, data) => {
               if (!err) {
                 console.log(data)
+                if (!data.playlists.items[0]) return
                 data.playlists.name = v.name
                 this.listCollection.push(data.playlists)
               }
