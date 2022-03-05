@@ -19,6 +19,8 @@ const TokenTools = {
       })
       .catch((err) => {
         console.log(err)
+        // goAuth
+        location.href = baseUrl
       })
   },
   getTokens() {
