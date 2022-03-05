@@ -35,7 +35,7 @@
         <!-- 曲目单元 -->
         <van-cell
           class="track-item"
-          v-for="item in list"
+          v-for="(item, index) in list"
           v-lazy="item.track.album.images[1].url"
           :key="item.track.id"
           clickable
@@ -47,6 +47,8 @@
                   name: item.track.name,
                   artists: item.track.artists,
                   album: item.track.album,
+                  list: list,
+                  index: index,
                 })
               : ''
           "

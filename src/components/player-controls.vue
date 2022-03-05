@@ -43,10 +43,10 @@
           <van-progress :percentage="currentRate" color="#1fd760" stroke-width="8" :show-pivot="false" />
         </div>
         <div class="play-button">
-          <van-icon name="arrow-left" size="58" />
+          <van-icon name="arrow-left" size="58" @click.stop="prev" />
           <van-icon v-if="!state.isPlaying" @click.stop="play" name="play-circle-o" size="58" />
           <van-icon v-if="state.isPlaying" @click.stop="pause" name="pause-circle-o" size="58" />
-          <van-icon name="arrow" size="58" />
+          <van-icon name="arrow" @click.stop="next" size="58" />
         </div>
       </div>
     </div>
@@ -97,6 +97,12 @@
       pause() {
         this.isPlaying = false
         this.$refs.player.play(this.state.url, this.state.id)
+      },
+      prev() {
+        this.$refs.player.prev()
+      },
+      next() {
+        this.$refs.player.next()
       },
       getRate(val) {
         this.currentRate = val
