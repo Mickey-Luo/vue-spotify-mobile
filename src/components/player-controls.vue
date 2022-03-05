@@ -116,14 +116,29 @@
         this.nowHeight = this.$refs.panel.offsetHeight
       },
       drag(e) {
+        let tabbar = this.$parent.$refs.tabbar.$el
         let panel = this.$refs.panel
         let mini = this.$refs.mini
         let large = this.$refs.large
         this.distance = e.touches[0].pageY - this.touchStartY
         let percentage = (panel.offsetHeight - this.originalHeight) / (window.innerHeight - this.originalHeight)
         // panel超出屏幕时跳出
-        if (panel.offsetTop < 0) return
-        if (panel.offsetTop > this.originalTop) return
+        // 从下方的情况
+        if (!this.expanded) {
+          if (this.distance > 0) {
+            this.distance = 0
+          } else if (-this.distance > this.originalTop) {
+            this.distance = this.originalTop
+          }
+        } else {
+          // 从上方的情况
+          if (this.distance < 0) {
+            this.distance = 0
+          } else if (this.distance > this.originalTop) {
+            this.distance = this.originalTop
+          }
+        }
+
         // 触摸起始点当超过封面下方时不被拖动
         if (this.expanded && this.touchStartY > this.$refs.detail.offsetTop) return
         // gsap
@@ -131,6 +146,7 @@
         gsap.set(mini, { opacity: 1 - easeOutExpo(percentage) })
         gsap.set(large, { opacity: easeOutExpo(percentage) })
         gsap.set(panel, { height: this.nowHeight - this.distance })
+        gsap.set(tabbar, { y: tabbar.offsetHeight * percentage })
       },
       touchEnd() {
         if (this.expanded) {
@@ -153,15 +169,19 @@
         this.distance = null
       },
       expand() {
+        let tabbar = this.$parent.$refs.tabbar.$el
         let panel = this.$refs.panel
         let mini = this.$refs.mini
         let large = this.$refs.large
         gsap.to(panel, { height: "100%", backgroundColor: "rgba(240,240,240,1)" })
         gsap.to(mini, { opacity: 0 })
         gsap.to(large, { opacity: 1 })
+        gsap.to(tabbar, { y: tabbar.offsetHeight })
+
         this.expanded = true
       },
       close() {
+        let tabbar = this.$parent.$refs.tabbar.$el
         let panel = this.$refs.panel
         let mini = this.$refs.mini
         let large = this.$refs.large
@@ -169,6 +189,8 @@
         gsap.to(panel, { height: this.originalHeight, backgroundColor: "rgba(240,240,240,0)" })
         gsap.to(mini, { opacity: 1 })
         gsap.to(large, { opacity: 0 })
+        gsap.to(tabbar, { y: 0 })
+
         this.expanded = false
       },
     },

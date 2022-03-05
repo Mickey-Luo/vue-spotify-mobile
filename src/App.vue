@@ -2,7 +2,7 @@
   <div id="app">
     <router-view></router-view>
     <player-controls></player-controls>
-    <van-tabbar v-model="active">
+    <van-tabbar ref="tabbar" v-model="active">
       <van-tabbar-item replace to="/home" icon="home-o">主页</van-tabbar-item>
       <van-tabbar-item replace to="/search" icon="search">搜索</van-tabbar-item>
       <van-tabbar-item replace to="/user" icon="friends-o">我的</van-tabbar-item>
@@ -31,7 +31,7 @@
         const { access_token, refresh_token } = this.$spotifyApi.getTokens()
         if (access_token && refresh_token) {
           console.log("获取了本地token,顺便刷新")
-          this.$spotifyApi.refreshToken(refresh_token) 
+          this.$spotifyApi.refreshToken(refresh_token)
           this.$spotifyApi.setAccessToken(access_token)
         } else {
           setTimeout(() => {
@@ -81,6 +81,7 @@
     height: 60px;
     background: linear-gradient(transparent -500%, rgb(255, 255, 255) 60%);
     border: none;
+    z-index: 2049;
     .van-tabbar-item--active {
       background: none;
     }
