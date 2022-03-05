@@ -4,7 +4,7 @@
     <div class="grid-container">
       <div class="grid">
         <div class="grid-item" v-for="(item, index) in playlists.items" :key="index" @click="go('tracklist', item.id)">
-          <van-image :src="item.images[0].url" />
+          <img :src="item.images[0].url" />
           <p v-html="item.description" class="van-multi-ellipsis--l2"></p>
         </div>
       </div>
@@ -64,7 +64,7 @@
         font-size: 14px;
         font-weight: 300;
 
-        .van-image {
+        img {
           width: 138px;
           height: 138px;
         }
