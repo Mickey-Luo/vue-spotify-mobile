@@ -27,7 +27,7 @@
     <div class="large" ref="large" @click.prevent.stop="expanded ? '' : expand()" @touchstart="touchStart" @touchmove.prevent.stop="drag" @touchend="touchEnd">
       <van-nav-bar title="Spotify">
         <template #left>
-          <van-icon name="arrow-down" size="18" @click="close" />
+          <van-icon name="arrow-down" size="18" @click.stop="close" />
         </template>
       </van-nav-bar>
       <div class="container">
