@@ -1,11 +1,11 @@
 <template>
   <div id="home">
-    <keep-alive>
-      <transition :name="navForward ? 'go' : 'backward'">
-        <component class="component" id="component" :is="navHistory[navHistory.length - 1] || navBase" @go="go" @backward="backward" :playlistId="playlistId">
-        </component>
-      </transition>
-    </keep-alive>
+    <!-- <keep-alive> -->
+    <transition :name="navForward ? 'go' : 'backward'">
+      <component class="component" id="component" :is="navHistory[navHistory.length - 1] || navBase" @go="go" @backward="backward" :playlistId="playlistId">
+      </component>
+    </transition>
+    <!-- </keep-alive> -->
   </div>
 </template>
 
@@ -32,7 +32,6 @@
     methods: {
       go(dest, playlistId) {
         this.navForward = true
-        console.log(playlistId)
         this.playlistId = playlistId
         this.navHistory.push(dest)
       },

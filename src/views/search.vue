@@ -1,23 +1,9 @@
 <template>
   <div>
-    <van-search
-      @input="input"
-      v-model="searchInput"
-      show-action
-      shape="round"
-      placeholder="请输入搜索关键词"
-    />
+    <van-search @input="input" v-model="searchInput" show-action shape="round" placeholder="请输入搜索关键词" />
     <!-- 搜索结果列表 -->
     <div class="track-list-container">
-      <van-list
-        ref="list"
-        class="track-list"
-        v-model="loading"
-        :finished="finished"
-        :immediate-check="false"
-        finished-text="没有更多了"
-        @load="onLoad"
-      >
+      <van-list ref="list" class="track-list" v-model="loading" :finished="finished" :immediate-check="false" finished-text="没有更多了" @load="onLoad">
         <!-- 曲目单元 -->
         <van-cell
           class="track-item"
@@ -32,7 +18,7 @@
                   id: item.id,
                   name: item.name,
                   artists: item.artists,
-                  album: item.album
+                  album: item.album,
                 })
               : ''
           "
@@ -57,18 +43,8 @@
                 :rate="0"
               >
                 <!-- 播放 - 暂停 -->
-                <van-icon
-                  v-if="!isPlaying && playingId === item.id"
-                  name="play"
-                  size="27px"
-                  color="#1fd760"
-                />
-                <van-icon
-                  v-if="isPlaying && playingId === item.id"
-                  name="pause"
-                  size="27px"
-                  color="#1fd760"
-                />
+                <van-icon v-if="!isPlaying && playingId === item.id" name="play" size="27px" color="#1fd760" />
+                <van-icon v-if="isPlaying && playingId === item.id" name="pause" size="27px" color="#1fd760" />
                 <!-- 加载图标 -->
                 <van-loading v-if="playingId === item.id && inQueueId === item.id" />
               </van-circle>
@@ -83,29 +59,15 @@
               </div>
             </van-col>
             <!-- 动作图标 -->
-            <van-button
-              @click.stop=";(show = true), showFn(item.name, item.artists, item.album)"
-              round
-              icon="ellipsis"
-            ></van-button>
+            <van-button @click.stop=";(show = true), showFn(item.name, item.artists, item.album)" round icon="ellipsis"></van-button>
           </van-row>
         </van-cell>
       </van-list>
       <!-- 动作面板 -->
-      <van-action-sheet
-        v-model="show"
-        :actions="actions"
-        cancel-text="取消"
-        close-on-click-action
-        safe-area-inset-bottom
-      >
+      <van-action-sheet v-model="show" :actions="actions" cancel-text="取消" close-on-click-action safe-area-inset-bottom>
         <template #description>
           <p></p>
-          <van-image
-            :src="showAlbum && showAlbum.images[0].url"
-            fit="cover"
-            height="256"
-            width="256"
+          <van-image :src="showAlbum && showAlbum.images[0].url" fit="cover" height="256" width="256"
             ><template v-slot:loading>
               <van-loading type="spinner" />
             </template>
@@ -135,11 +97,7 @@
         loading: false,
         finished: false,
         // 动作面板
-        actions: [
-          { name: "查看专辑", icon: "star-o" },
-          { name: "查看艺人" },
-          { name: "添加到歌单" }
-        ],
+        actions: [{ name: "查看专辑", icon: "star-o" }, { name: "查看艺人" }, { name: "添加到歌单" }],
         currentRate: 0,
         defaultVolume: 50,
         isPlaying: false,
@@ -151,7 +109,7 @@
         playingArtists: [],
         inQueueId: "",
         inQueueUrl: "",
-        ready: true
+        ready: true,
       }
     },
     methods: {
@@ -171,49 +129,44 @@
         }
 
         console.log("获取歌曲列表！")
-        this.$spotifyApi.search(
-          this.searchValue,
-          ["track", "artist"],
-          { offset: this.offset, limit: 40, include_external: "audio" },
-          (err, data) => {
-            if (err) {
-              // ❌ 报错
-              // console.error(err)
-              // 如果token过期
-              // if (err.status === 401) alert("token过期")
-              // 获取新token
-              this.$spotifyApi.refreshToken()
-              // 重新设置token
-              this.$spotifyApi.setAccessToken(localStorage.getItem("vue_spotify_token"))
+        this.$spotifyApi.search(this.searchValue, ["track", "artist"], { offset: this.offset, limit: 40, include_external: "audio" }, (err, data) => {
+          if (err) {
+            // ❌ 报错
+            // console.error(err)
+            // 如果token过期
+            // if (err.status === 401) alert("token过期")
+            // 获取新token
+            this.$spotifyApi.refreshToken()
+            // 重新设置token
+            this.$spotifyApi.setAccessToken(localStorage.getItem("vue_spotify_token"))
 
-              // 加载状态结束
-              this.loading = false
-            } else {
-              // ✅ 成功
+            // 加载状态结束
+            this.loading = false
+          } else {
+            // ✅ 成功
 
-              console.log("歌曲列表", data)
+            console.log("歌曲列表", data)
 
-              // 添加歌曲总数到变量
-              this.total = data.tracks.total
+            // 添加歌曲总数到变量
+            this.total = data.tracks.total
 
-              // 添加数据到数组
-              this.list.push(...data.tracks.items)
+            // 添加数据到数组
+            this.list.push(...data.tracks.items)
 
-              // 加载状态结束
-              this.loading = false
+            // 加载状态结束
+            this.loading = false
 
-              // 请求完成后，保存搜索请求
-              this.searchQuery = this.searchValue
+            // 请求完成后，保存搜索请求
+            this.searchQuery = this.searchValue
 
-              // 请求完后，曲目开始数后移40位
-              this.offset += 40
-              // 数据全部加载完成
-              if (data.length < 40) {
-                this.finished = true
-              }
+            // 请求完后，曲目开始数后移40位
+            this.offset += 40
+            // 数据全部加载完成
+            if (data.length < 40) {
+              this.finished = true
             }
           }
-        )
+        })
       },
       input() {
         // 防抖
@@ -239,7 +192,7 @@
           return v.name
         })
         this.showAlbum = album
-      }
+      },
     },
     mounted() {
       // 获得圆环进度
@@ -254,7 +207,7 @@
       EventBus.$on("queue", (id) => {
         this.inQueueId = id
       })
-    }
+    },
   }
 </script>
 
