@@ -31,7 +31,7 @@ import {
   Grid,
   GridItem,
   Lazyload,
-  Image as VanImage
+  Image as VanImage,
 } from "vant"
 
 Vue.use(Progress)
@@ -56,7 +56,7 @@ Vue.use(Icon)
 Vue.use(Grid)
 Vue.use(GridItem)
 Vue.use(Lazyload, {
-  lazyComponent: true
+  lazyComponent: true,
 })
 Vue.use(VanImage)
 
@@ -65,5 +65,5 @@ import router from "./router/index"
 
 new Vue({
   router,
-  render: (h) => h(App)
+  render: (h) => h(App),
 }).$mount("#app")

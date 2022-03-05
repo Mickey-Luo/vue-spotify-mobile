@@ -63,6 +63,7 @@
     },
     mounted() {
       this.$nextTick(() => {
+        // 获取数据
         function wait(ms) {
           return new Promise((resolve) => {
             setTimeout(() => {
@@ -86,7 +87,6 @@
             await wait(50)
             this.$spotifyApi.getCategoryPlaylists(v.id, { country: "JP", limit: 10, offset: 0 }, (err, data) => {
               if (!err) {
-                console.log(data)
                 if (!data.playlists.items[0]) return
                 data.playlists.name = v.name
                 this.listCollection.push(data.playlists)
