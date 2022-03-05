@@ -31,8 +31,8 @@
         const { access_token, refresh_token } = this.$spotifyApi.getTokens()
         if (access_token && refresh_token) {
           console.log("获取了本地token,顺便刷新")
+          this.$spotifyApi.refreshToken(refresh_token) 
           this.$spotifyApi.setAccessToken(access_token)
-          this.$spotifyApi.refreshToken(refresh_token)
         } else {
           setTimeout(() => {
             this.$spotifyApi.goAuth()

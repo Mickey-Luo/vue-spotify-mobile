@@ -71,7 +71,16 @@
           })
         }
         this.$spotifyApi.getCategories({ country: "JP", limit: 50, locale: "zh_CN", offset: 0 }, async (err, data) => {
-          if (!err) console.log(data)
+          if (err) {
+            console.log(err)
+            if (err.status === 401) {
+              console.log(401)
+              this.$spotifyApi.refreshToken().then(() => {
+                this.$router.go()
+              })
+            }
+            return
+          }
           // 获得了歌单列表，开始请求歌单
           for (const v of data.categories.items) {
             await wait(50)

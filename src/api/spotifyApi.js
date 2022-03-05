@@ -9,7 +9,7 @@ const TokenTools = {
     localStorage.setItem("vue_spotify_refresh_token", refresh_token)
   },
   refreshToken() {
-    axios(baseUrl + "/refresh_token", {
+    return axios(baseUrl + "/refresh_token", {
       params: {
         refresh_token: localStorage.getItem("vue_spotify_refresh_token"),
       },
