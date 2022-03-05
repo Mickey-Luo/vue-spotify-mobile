@@ -16,15 +16,15 @@
         <p class="artists van-ellipsis">{{ state.artists.join(" · ") }}</p>
       </div>
       <div class="play-button">
-        <van-icon v-if="!state.isPlaying" @click.stop="expanded ? '' : play()" name="play" size="28px" />
-        <van-icon v-if="state.isPlaying" @click.stop="expanded ? '' : pause()" name="pause" size="28x" />
+        <van-icon v-if="!state.isPlaying" @click.stop="!state.url || expanded ? '' : play()" name="play" size="28px" />
+        <van-icon v-if="state.isPlaying" @click.stop="!state.url || expanded ? '' : pause()" name="pause" size="28x" />
       </div>
       <div class="progress">
         <van-progress :percentage="currentRate" color="#1fd760" :show-pivot="false" />
       </div>
     </div>
     <!-- 大面板 -->
-    <div class="large" ref="large">
+    <div class="large" ref="large" @click.prevent.stop="expanded ? '' : expand()" @touchstart="touchStart" @touchmove.prevent.stop="drag" @touchend="touchEnd">
       <van-nav-bar title="Spotify">
         <template #left>
           <van-icon name="arrow-down" size="18" @click="close" />
@@ -35,7 +35,7 @@
         <div class="track-cover">
           <img :src="Object.keys(state.album).length !== 0 ? state.album.images[1].url : ''" v-show="Object.keys(state.album).length !== 0" />
         </div>
-        <div class="track-detail">
+        <div class="track-detail" ref="detail">
           <p class="name van-ellipsis">{{ state.name }}</p>
           <p class="artists van-ellipsis">{{ state.artists.join(" · ") }}</p>
         </div>
@@ -44,8 +44,8 @@
         </div>
         <div class="play-button">
           <van-icon name="arrow-left" size="58" @click.stop="prev" />
-          <van-icon v-if="!state.isPlaying" @click.stop="play" name="play-circle-o" size="58" />
-          <van-icon v-if="state.isPlaying" @click.stop="pause" name="pause-circle-o" size="58" />
+          <van-icon v-if="!state.isPlaying" @click.stop="!state.url || play()" name="play-circle-o" size="58" />
+          <van-icon v-if="state.isPlaying" @click.stop="!state.url || pause()" name="pause-circle-o" size="58" />
           <van-icon name="arrow" @click.stop="next" size="58" />
         </div>
       </div>
@@ -120,12 +120,12 @@
         let large = this.$refs.large
         this.distance = e.touches[0].pageY - this.touchStartY
         let percentage = (panel.offsetHeight - this.originalHeight) / (window.innerHeight - this.originalHeight)
-        // if (panel.offsetHeight - this.originalHeight <= 0) return
-
+        // 触摸起始点当超过封面下方时不被拖动
+        if (this.expanded && this.touchStartY > this.$refs.detail.offsetTop) return
         // gsap
         gsap.set(panel, { backgroundColor: "rgba(240,240,240," + easeOutExpo(percentage) + ")" })
-        gsap.set(mini, { opacity: 1 - percentage })
-        gsap.set(large, { opacity: percentage })
+        gsap.set(mini, { opacity: 1 - easeOutExpo(percentage) })
+        gsap.set(large, { opacity: easeOutExpo(percentage) })
         gsap.set(panel, { height: this.nowHeight - this.distance })
       },
       touchEnd() {
@@ -161,7 +161,7 @@
         let panel = this.$refs.panel
         let mini = this.$refs.mini
         let large = this.$refs.large
-        gsap.to(panel, { backgroundColor: "rgba(240,240,240,0)", ease: "expo.in" })
+        gsap.to(panel, { backgroundColor: "rgba(240,240,240,0)" })
         gsap.to(panel, { height: this.originalHeight, backgroundColor: "rgba(240,240,240,0)" })
         gsap.to(mini, { opacity: 1 })
         gsap.to(large, { opacity: 0 })

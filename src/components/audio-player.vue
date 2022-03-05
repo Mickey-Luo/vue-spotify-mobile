@@ -72,6 +72,7 @@
 
     methods: {
       play(url, id, name, artists, album, list, index, direction) {
+        // 如果没有url,跳过
         if (!url) {
           direction === "next" ? this.playingIndex++ : this.playingIndex--
           direction === "next" ? this.next() : this.prev()
