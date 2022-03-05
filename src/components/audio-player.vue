@@ -143,12 +143,10 @@
         if (this.playingIndex === 0) {
           to = this.playingList.length - 1
         }
-        console.log("to", to)
         let track = this.playingList[to].track
         let artists = track.artists.map((v) => {
           return v.name
         })
-        console.log(this.playingList, this.playingIndex)
         this.play(track.preview_url, track.id, track.name, artists, track.album, this.playingList, to, "prev")
       },
       next() {
@@ -156,13 +154,10 @@
         if (this.playingIndex === this.playingList.length - 1) {
           to = 0
         }
-        console.log("to", to)
-
         let track = this.playingList[to].track
         let artists = track.artists.map((v) => {
           return v.name
         })
-        console.log(this.playingList, this.playingIndex)
         this.play(track.preview_url, track.id, track.name, artists, track.album, this.playingList, to, "next")
       },
     },

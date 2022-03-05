@@ -111,6 +111,7 @@
         this.touchStartY = e.touches[0].pageY
         if (this.originalHeight === null) {
           this.originalHeight = this.$refs.panel.offsetHeight
+          this.originalTop = this.$refs.panel.offsetTop
         }
         this.nowHeight = this.$refs.panel.offsetHeight
       },
@@ -120,6 +121,9 @@
         let large = this.$refs.large
         this.distance = e.touches[0].pageY - this.touchStartY
         let percentage = (panel.offsetHeight - this.originalHeight) / (window.innerHeight - this.originalHeight)
+        // panel超出屏幕时跳出
+        if (panel.offsetTop < 0) return
+        if (panel.offsetTop > this.originalTop) return
         // 触摸起始点当超过封面下方时不被拖动
         if (this.expanded && this.touchStartY > this.$refs.detail.offsetTop) return
         // gsap
