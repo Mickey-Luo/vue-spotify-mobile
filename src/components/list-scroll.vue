@@ -4,7 +4,7 @@
     <div class="grid-container">
       <div class="grid">
         <div class="grid-item" v-for="(item, index) in playlists.items" :key="index" @click="go('tracklist', item.id)">
-          <img :src="item.images[0].url" />
+          <img v-lazy="item.images[0].url" />
           <p v-html="item.description" class="van-multi-ellipsis--l2"></p>
         </div>
       </div>

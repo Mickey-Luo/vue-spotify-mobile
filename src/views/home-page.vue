@@ -84,7 +84,7 @@
           // 获得了歌单列表，开始请求歌单
           for (const v of data.categories.items) {
             await wait(50)
-            this.$spotifyApi.getCategoryPlaylists(v.id, { country: "JP", limit: 12, offset: 0 }, (err, data) => {
+            this.$spotifyApi.getCategoryPlaylists(v.id, { country: "JP", limit: 10, offset: 0 }, (err, data) => {
               if (!err) {
                 console.log(data)
                 if (!data.playlists.items[0]) return
