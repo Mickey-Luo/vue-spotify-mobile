@@ -211,6 +211,7 @@
     z-index: 1;
     .mini {
       position: absolute;
+      z-index: 1;
       top: 0;
       left: 50%;
       transform: translateX(-50%);
