@@ -20,7 +20,7 @@
         <van-icon v-if="state.isPlaying" @click.stop="!state.url || expanded ? '' : pause()" name="pause" size="28x" />
       </div>
       <div class="progress">
-        <van-progress :percentage="currentRate" color="#1fd760" :show-pivot="false" />
+        <van-progress :percentage="currentRate" color="#1fd760" track-color="#999" :show-pivot="false" />
       </div>
     </div>
     <!-- 大面板 -->
@@ -40,7 +40,7 @@
             <p class="artists van-ellipsis">{{ state.artists.join(" · ") }}</p>
           </div>
           <div class="progress">
-            <van-progress :percentage="currentRate" color="#1fd760" stroke-width="4" :show-pivot="false" />
+            <van-progress :percentage="currentRate" color="#1fd760" track-color="#999" stroke-width="4" :show-pivot="false" />
           </div>
           <div class="play-button">
             <van-icon name="arrow-left" size="58" @click.stop="prev" />
@@ -216,7 +216,7 @@
       left: 50%;
       transform: translateX(-50%);
       box-sizing: border-box;
-      overflow: hidden;
+      // overflow: hidden;
       margin: 0 auto;
       padding: 4px 8px;
       width: 100%;
@@ -261,9 +261,10 @@
       }
       .progress {
         position: absolute;
-        left: 0;
-        bottom: 0;
-        width: 100%;
+        left: 50%;
+        transform: translateX(-50%);
+        bottom: -2px;
+        width: 95.2%;
       }
     }
     // 大面板
@@ -277,12 +278,12 @@
       }
       .container {
         flex: 1;
-        width: 92%;
+        width: 85%;
         height: calc(100%-60px);
-        margin: 0 auto;
+        margin: 25px auto;
         .track-cover {
-          width: 92vw;
-          height: 92vw;
+          width: 85vw;
+          height: 85vw;
           background-color: #fff;
           img {
             width: 100%;
