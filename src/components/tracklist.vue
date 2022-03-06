@@ -6,31 +6,33 @@
         <p ref="title" @click.stop="onClick">
           {{ listName }}
         </p>
-      </template></van-nav-bar
-    >
-    <!-- 搜索框 -->
-    <!-- <van-search v-model="searchValue" show-action shape="round" placeholder="请输入搜索关键词" :style="{ opacity: 1 - (scrollTop - 5) / 25 }">
+      </template>
+    </van-nav-bar>
+    <div class="playlist-detail" :style="{ background: `linear-gradient(${primary_color}, #fff)` }">
+      <!-- 搜索框 -->
+      <!-- <van-search v-model="searchValue" show-action shape="round" placeholder="请输入搜索关键词" :style="{ opacity: 1 - (scrollTop - 5) / 25 }">
       <template #action>
         <div>排序</div>
       </template>
     </van-search> -->
-    <!-- 歌单信息 -->
-    <div
-      v-if="backgroundImage"
-      class="cover"
-      ref="cover"
-      :style="{
-        background: 'no-repeat center top/50% url(' + backgroundImage + ') ',
-        height: backgroundImage ? '52vw' : '',
-      }"
-    ></div>
-    <div v-if="backgroundImage" class="page-title">
-      <p v-html="this.description"></p>
-    </div>
-    <div v-else class="page-title" style="margin-top: 60px" :style="{ opacity: 1 - scrollTop / 60 }">
-      <h2>{{ listName }}</h2>
-      <p>{{ total.toLocaleString() }} 首歌曲</p>
-      <!-- <p v-html="this.description"></p> -->
+      <!-- 歌单信息 -->
+      <div
+        v-if="backgroundImage"
+        class="cover"
+        ref="cover"
+        :style="{
+          background: 'no-repeat center top/50% url(' + backgroundImage + ') ',
+          height: backgroundImage ? '52vw' : '',
+        }"
+      ></div>
+      <div v-if="backgroundImage" class="page-title">
+        <p v-html="this.description"></p>
+      </div>
+      <div v-else class="page-title" style="margin-top: 60px" :style="{ opacity: 1 - scrollTop / 60 }">
+        <h2>{{ listName }}</h2>
+        <p>{{ total.toLocaleString() }} 首歌曲</p>
+        <!-- <p v-html="this.description"></p> -->
+      </div>
     </div>
     <!-- 歌单 list -->
     <div class="track-list-container">
@@ -141,6 +143,7 @@
         searchValue: "",
         // 歌单信息
         total: 0,
+        primary_color: "",
         description: "",
         backgroundImage: "",
         // 双击标题返回
@@ -201,6 +204,8 @@
             // 拿到歌单名
             this.listName = data.name || "已点赞的歌"
             // 歌单详情
+            this.primary_color = data.primary_color
+
             this.description = data.description || ""
             data.images && (this.backgroundImage = data.images[0].url)
             // 添加歌曲总数到变量
@@ -254,12 +259,12 @@
         let bar = this.$refs.bar.$el
         this.scrollTop = this.$refs.tracklist.scrollTop <= 1000 ? this.$refs.tracklist.scrollTop : 1000
         if (tracklist.scrollTop < 500) {
-          cover && gsap.set(cover, { scale: (100 - tracklist.scrollTop / 3) / 100 })
-          gsap.set(bar, { backgroundColor: `rgba(255, 255, 255,${tracklist.scrollTop / 3 / 100})` })
-          // console.log(list.$el.offsetTop - list.scroller.scrollTop)
+          cover && gsap.set(cover, { scale: (100 - tracklist.scrollTop / 4) / 100 })
+          let num = Math.min(tracklist.scrollTop * 1, 255).toString(16)
+          gsap.set(bar, { backgroundColor: (this.primary_color || "#ffffff") + (num.length === 1 ? "0" + num : num) })
           // 列表到顶部的距离
-          if (list.$el.offsetTop - list.scroller.scrollTop >= 120) {
-            gsap.set(title, { transform: `translateY(${list.$el.offsetTop - list.scroller.scrollTop - 120}px)` })
+          if (list.$el.offsetTop - list.scroller.scrollTop >= 100) {
+            gsap.set(title, { transform: `translateY(${list.$el.offsetTop - list.scroller.scrollTop - 100}px)` })
           } else {
             gsap.set(title, { transform: `translateY(0px)` })
           }
@@ -331,7 +336,7 @@
     top: 0;
     width: 100%;
     height: 60px;
-    background-color: #fff0;
+    background: none;
     .van-nav-bar__content {
       height: 60px;
       .van-nav-bar__title p {
@@ -339,10 +344,10 @@
       }
     }
   }
-
-  .cover {
-    margin-top: 23px;
+  .playlist-detail {
+    padding-top: 23px;
   }
+
   .track-list-container {
     padding: 0 0 70px 0;
     .track-list {
