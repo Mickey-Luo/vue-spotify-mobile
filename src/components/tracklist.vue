@@ -237,10 +237,11 @@
             console.log(data)
             this.list.forEach((v) => {
               if (v.saved === undefined) {
-                v.saved = data.unshift()
-                this.$forceUpdate()
+                v.saved = data[0]
+                data.unshift()
               }
             })
+            this.$forceUpdate()
           }
         })
       },
