@@ -3,13 +3,7 @@
     <!-- 标题栏1 -->
     <van-nav-bar ref="bar" :border="false" left-arrow @click-left="backward">
       <template #title>
-        <p
-          @click.stop="onClick"
-          :style="{
-            opacity: (scrollTop - 100) / 50,
-            transform: scrollTop > 500 ? 'none' : 'translateY(' + 80 / (scrollTop - 120) + 'px)',
-          }"
-        >
+        <p ref="title" @click.stop="onClick">
           {{ listName }}
         </p>
       </template></van-nav-bar
@@ -26,17 +20,14 @@
       class="cover"
       ref="cover"
       :style="{
-        opacity: 1.1 - (scrollTop - 50) / 80,
         background: 'no-repeat center top/50% url(' + backgroundImage + ') ',
         height: backgroundImage ? '52vw' : '',
       }"
     ></div>
     <div v-if="backgroundImage" class="page-title">
-      <!-- <h2>{{ listName }}</h2> -->
-      <!-- <p>{{ total.toLocaleString() }} 首歌曲</p> -->
       <p v-html="this.description"></p>
     </div>
-    <div v-else class="page-title">
+    <div v-else class="page-title" style="margin-top: 60px" :style="{ opacity: 1 - scrollTop / 60 }">
       <h2>{{ listName }}</h2>
       <p>{{ total.toLocaleString() }} 首歌曲</p>
       <!-- <p v-html="this.description"></p> -->
@@ -234,12 +225,25 @@
       },
       onScroll() {
         let cover = this.$refs.cover
+        let title = this.$refs.title
         let tracklist = this.$refs.tracklist
+        let list = this.$refs.list
         let bar = this.$refs.bar.$el
         this.scrollTop = this.$refs.tracklist.scrollTop <= 1000 ? this.$refs.tracklist.scrollTop : 1000
+        console.log(this.scrollTop)
         if (tracklist.scrollTop < 500) {
           cover && gsap.set(cover, { scale: (100 - tracklist.scrollTop / 3) / 100 })
           gsap.set(bar, { backgroundColor: `rgba(255, 255, 255,${tracklist.scrollTop / 3 / 100})` })
+          // console.log(1)
+          // console.dir(list.scroller.scrollTop)
+          // console.dir(list.$el.offsetTop)
+          // console.log(list.$el.offsetTop - list.scroller.scrollTop)
+          // 列表到顶部的距离
+          if (list.$el.offsetTop - list.scroller.scrollTop >= 120) {
+            gsap.set(title, { transform: `translateY(${list.$el.offsetTop - list.scroller.scrollTop - 120}px)` })
+          } else {
+            gsap.set(title, { transform: `translateY(0px)` })
+          }
         }
       },
       // 绑定双击方法，用于双击标题栏时页面回到顶部
@@ -293,7 +297,6 @@
 
 <style lang="less" scoped>
   .page-title {
-    margin-top: 60px;
     & > * {
       box-sizing: border-box;
       margin: 16px 16px;
@@ -312,11 +315,14 @@
     background-color: #fff0;
     .van-nav-bar__content {
       height: 60px;
+      .van-nav-bar__title p {
+        transform: translateY(100%);
+      }
     }
   }
 
   .cover {
-    margin-top: 60px;
+    margin-top: 23px;
   }
   .track-list-container {
     padding: 0 0 70px 0;
