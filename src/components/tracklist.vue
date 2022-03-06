@@ -1,33 +1,45 @@
 <template>
-  <div ref="tracklist" id="tracklist" @scroll="scroll">
+  <div ref="tracklist" id="tracklist" @scroll="onScroll">
     <!-- 标题栏1 -->
-    <van-nav-bar class="fixed-nav" left-arrow @click-left="backward" />
-    <!-- 标题栏2 -->
-    <van-sticky>
-      <van-nav-bar ref="bar" :border="false" left-arrow @click-left="backward" :style="{ opacity: scrollTop > 1000 ? 1 : scrollTop / 250 }">
-        <template #title>
-          <p
-            @click="onClick"
-            :style="{
-              opacity: (scrollTop - 100) / 50,
-              transform: scrollTop > 1000 ? 'none' : 'translateY(' + 80 / (scrollTop - 120) + 'px)',
-            }"
-          >
-            {{ listName }}
-          </p>
-        </template></van-nav-bar
-      >
-    </van-sticky>
+    <van-nav-bar ref="bar" :border="false" left-arrow @click-left="backward">
+      <template #title>
+        <p
+          @click.stop="onClick"
+          :style="{
+            opacity: (scrollTop - 100) / 50,
+            transform: scrollTop > 500 ? 'none' : 'translateY(' + 80 / (scrollTop - 120) + 'px)',
+          }"
+        >
+          {{ listName }}
+        </p>
+      </template></van-nav-bar
+    >
     <!-- 搜索框 -->
-    <van-search v-model="searchValue" show-action shape="round" placeholder="请输入搜索关键词" :style="{ opacity: 1 - (scrollTop - 5) / 25 }">
+    <!-- <van-search v-model="searchValue" show-action shape="round" placeholder="请输入搜索关键词" :style="{ opacity: 1 - (scrollTop - 5) / 25 }">
       <template #action>
         <div>排序</div>
       </template>
-    </van-search>
+    </van-search> -->
     <!-- 歌单信息 -->
-    <div class="page-title" :style="{ opacity: 1.1 - (scrollTop - 50) / 80 }">
+    <div
+      v-if="backgroundImage"
+      class="cover"
+      ref="cover"
+      :style="{
+        opacity: 1.1 - (scrollTop - 50) / 80,
+        background: 'no-repeat center top/50% url(' + backgroundImage + ') ',
+        height: backgroundImage ? '52vw' : '',
+      }"
+    ></div>
+    <div v-if="backgroundImage" class="page-title">
+      <!-- <h2>{{ listName }}</h2> -->
+      <!-- <p>{{ total.toLocaleString() }} 首歌曲</p> -->
+      <p v-html="this.description"></p>
+    </div>
+    <div v-else class="page-title">
       <h2>{{ listName }}</h2>
       <p>{{ total.toLocaleString() }} 首歌曲</p>
+      <!-- <p v-html="this.description"></p> -->
     </div>
     <!-- 歌单 list -->
     <div class="track-list-container">
@@ -49,6 +61,7 @@
                   album: item.track.album,
                   list: list,
                   index: index,
+                  listName: listName,
                 })
               : ''
           "
@@ -111,6 +124,8 @@
 
 <script>
   import EventBus from "../utils/EventBus"
+  import { gsap } from "gsap"
+
   export default {
     name: "tracklist",
     props: {
@@ -134,11 +149,14 @@
         searchValue: "",
         // 歌单信息
         total: 0,
+        description: "",
+        backgroundImage: "",
         // 双击标题返回
         counter: 0,
         timer: 0,
         // 列表相关
         listName: "",
+
         // 播放相关
         currentRate: 0,
         defaultVolume: 50,
@@ -169,7 +187,7 @@
         // 如果没有在使用AccessToken，不执行
         if (!this.$spotifyApi.getAccessToken()) return
         console.log("获取歌曲列表！")
-        this.$spotifyApi.getPlaylist(this.playlistId, {}, (err, data) => {
+        let callback = (err, data) => {
           if (err) {
             // ❌ 报错
             console.error(err)
@@ -184,11 +202,15 @@
           } else {
             // ✅ 成功
             console.log("歌曲列表", data)
+            // 如果没有tracks，而直接是items，处理一下
+            if (!data.tracks && data.items) data.tracks = data
             const tracks = data.tracks
 
-            // 拿到歌名
-            this.listName = data.name
-
+            // 拿到歌单名
+            this.listName = data.name || "已点赞的歌"
+            // 歌单详情
+            this.description = data.description || ""
+            data.images && (this.backgroundImage = data.images[0].url)
             // 添加歌曲总数到变量
             this.total = tracks.total
 
@@ -202,14 +224,23 @@
             this.offset += 40
             // 数据全部加载完成
             if (this.list.length >= this.total) {
-              console.log(1)
               this.finished = true
             }
           }
-        })
+        }
+        if (this.playlistId === "my") {
+          this.$spotifyApi.getMySavedTracks({ limit: 40, offset: this.offset }, callback)
+        } else this.$spotifyApi.getPlaylist(this.playlistId, { limit: 40, offset: this.offset }, callback)
       },
-      scroll() {
+      onScroll() {
+        let cover = this.$refs.cover
+        let tracklist = this.$refs.tracklist
+        let bar = this.$refs.bar.$el
         this.scrollTop = this.$refs.tracklist.scrollTop <= 1000 ? this.$refs.tracklist.scrollTop : 1000
+        if (tracklist.scrollTop < 500) {
+          cover && gsap.set(cover, { scale: (100 - tracklist.scrollTop / 3) / 100 })
+          gsap.set(bar, { backgroundColor: `rgba(255, 255, 255,${tracklist.scrollTop / 3 / 100})` })
+        }
       },
       // 绑定双击方法，用于双击标题栏时页面回到顶部
       onClick() {
@@ -248,8 +279,9 @@
         this.currentRate = time
       })
       // 获得播放状态
-      EventBus.$on("playState", (isPlaying) => {
-        this.isPlaying = isPlaying
+      EventBus.$on("playState", (state) => {
+        this.isPlaying = state.isPlaying
+        this.playingId = state.id
       })
       // 获得等待播放曲目
       EventBus.$on("queue", (id) => {
@@ -259,8 +291,9 @@
   }
 </script>
 
-<style lang="less">
+<style lang="less" scoped>
   .page-title {
+    margin-top: 60px;
     & > * {
       box-sizing: border-box;
       margin: 16px 16px;
@@ -270,15 +303,20 @@
       font-size: 14px;
     }
   }
-  .fixed-nav {
+
+  /deep/ .van-nav-bar {
     position: fixed;
     top: 0;
-  }
-  .van-nav-bar {
+    width: 100%;
     height: 60px;
+    background-color: #fff0;
     .van-nav-bar__content {
       height: 60px;
     }
+  }
+
+  .cover {
+    margin-top: 60px;
   }
   .track-list-container {
     padding: 0 0 70px 0;
@@ -289,7 +327,6 @@
         height: 80px;
         .track-item-flexbox {
           flex-wrap: nowrap;
-
           height: 68px;
           .play-control {
             position: relative;

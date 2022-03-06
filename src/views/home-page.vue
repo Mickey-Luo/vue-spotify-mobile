@@ -7,10 +7,10 @@
       /></van-col>
     </van-row>
     <div class="grid" clickable>
-      <div class="grid-item" @click="go('saved-page')"><van-icon name="like" size="18px" />已点赞的歌</div>
-      <div class="grid-item" @click="go('saved-page')"><van-icon name="like" size="18px" />已点赞的歌</div>
-      <div class="grid-item" @click="go('saved-page')"><van-icon name="like" size="18px" />已点赞的歌</div>
-      <div class="grid-item" @click="go('saved-page')"><van-icon name="like" size="18px" />已点赞的歌</div>
+      <div class="grid-item" @click="go('tracklist', 'my')"><van-icon name="like" size="18px" />已点赞的歌</div>
+      <div class="grid-item" @click="go('tracklist', 'my')"><van-icon name="like" size="18px" />已点赞的歌</div>
+      <div class="grid-item" @click="go('tracklist', 'my')"><van-icon name="like" size="18px" />已点赞的歌</div>
+      <div class="grid-item" @click="go('tracklist', 'my')"><van-icon name="like" size="18px" />已点赞的歌</div>
     </div>
     <!-- 列表 -->
     <list-scroll v-for="(playlists, index) in listCollection" :key="index" :playlists="playlists" @go="go"></list-scroll>

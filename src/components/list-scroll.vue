@@ -48,7 +48,6 @@
       height: 100%;
       overflow: auto;
       display: flex;
-      justify-content: start;
       gap: 14px;
       padding: 0 170px 0 15px;
       -ms-overflow-style: none; /* IE and Edge */

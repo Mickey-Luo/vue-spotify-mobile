@@ -1,24 +1,54 @@
 <template>
-  <div>
-    <van-search @input="input" v-model="searchInput" show-action shape="round" placeholder="请输入搜索关键词" />
-    <!-- 搜索结果列表 -->
+  <div ref="tracklist" id="tracklist" @scroll="scroll">
+    <!-- 标题栏1 -->
+    <van-nav-bar class="fixed-nav" left-arrow @click-left="backward" />
+    <!-- 标题栏2 -->
+    <van-sticky>
+      <van-nav-bar ref="bar" :border="false" left-arrow @click-left="backward" :style="{ opacity: scrollTop > 1000 ? 1 : scrollTop / 250 }">
+        <template #title>
+          <p
+            @click="onClick"
+            :style="{
+              opacity: (scrollTop - 100) / 50,
+              transform: scrollTop > 1000 ? 'none' : 'translateY(' + 80 / (scrollTop - 120) + 'px)',
+            }"
+          >
+            {{ listName }}
+          </p>
+        </template></van-nav-bar
+      >
+    </van-sticky>
+    <!-- 搜索框 -->
+    <van-search v-model="searchValue" show-action shape="round" placeholder="请输入搜索关键词" :style="{ opacity: 1 - (scrollTop - 5) / 25 }">
+      <template #action>
+        <div>排序</div>
+      </template>
+    </van-search>
+    <!-- 歌单信息 -->
+    <div class="page-title" :style="{ opacity: 1.1 - (scrollTop - 50) / 80 }">
+      <h2>{{ listName }}</h2>
+      <p>{{ total.toLocaleString() }} 首歌曲</p>
+    </div>
+    <!-- 歌单 list -->
     <div class="track-list-container">
-      <van-list ref="list" class="track-list" v-model="loading" :finished="finished" :immediate-check="false" finished-text="没有更多了" @load="onLoad">
+      <van-list ref="list" class="track-list" v-model="loading" :finished="finished" finished-text="没有更多了" @load="onLoad">
         <!-- 曲目单元 -->
         <van-cell
           class="track-item"
-          v-for="item in list"
-          v-lazy="item.album.images[1].url"
-          :key="item.id"
+          v-for="(item, index) in list"
+          v-lazy="item.track.album.images[1].url"
+          :key="item.track.id"
           clickable
           @click="
-            item.preview_url
+            item.track.preview_url
               ? play({
-                  url: item.preview_url,
-                  id: item.id,
-                  name: item.name,
-                  artists: item.artists,
-                  album: item.album,
+                  url: item.track.preview_url,
+                  id: item.track.id,
+                  name: item.track.name,
+                  artists: item.track.artists,
+                  album: item.track.album,
+                  list: list,
+                  index: index,
                 })
               : ''
           "
@@ -27,7 +57,7 @@
             <!-- 曲目封面 -->
             <div class="play-control">
               <van-col class="track-image">
-                <van-image :src="item.album.images[1].url" fit="cover" height="68" width="68"
+                <van-image :src="item.track.album.images[1].url" fit="cover" height="68" width="68"
                   ><template v-slot:loading>
                     <van-loading type="spinner" />
                   </template>
@@ -35,7 +65,7 @@
               </van-col>
               <!-- 圆环 -->
               <van-circle
-                v-if="playingId === item.id || inQueueId == item.id"
+                v-if="playingId === item.track.id || inQueueId == item.track.id"
                 :stroke-width="70"
                 v-model="currentRate"
                 layer-color="#fff"
@@ -43,28 +73,27 @@
                 :rate="0"
               >
                 <!-- 播放 - 暂停 -->
-                <van-icon v-if="!isPlaying && playingId === item.id" name="play" size="27px" color="#1fd760" />
-                <van-icon v-if="isPlaying && playingId === item.id" name="pause" size="27px" color="#1fd760" />
+                <van-icon v-if="isPlaying || playingId === item.track.id" :name="isPlaying ? 'pause' : 'play'" size="27px" color="#1fd760" />
                 <!-- 加载图标 -->
-                <van-loading v-if="playingId === item.id && inQueueId === item.id" />
+                <van-loading v-if="playingId === item.track.id && inQueueId === item.track.id" />
               </van-circle>
             </div>
             <!-- 曲目信息 -->
-            <van-col class="track-detail van-ellipsis" :class="{ unavailable: !item.preview_url }">
-              <span class="track-name">{{ item.name }}</span>
+            <van-col class="track-detail van-ellipsis" :class="{ unavailable: !item.track.preview_url }">
+              <span class="track-name">{{ item.track.name }}</span>
               <div class="artist-name-container van-ellipsis">
-                <span class="artist-name" v-for="item in item.artists" :key="item.id">
+                <span class="artist-name" v-for="item in item.track.artists" :key="item.id">
                   {{ item.name }}
                 </span>
               </div>
             </van-col>
             <!-- 动作图标 -->
-            <van-button @click.stop=";(show = true), showFn(item.name, item.artists, item.album)" round icon="ellipsis"></van-button>
+            <van-button @click.stop=";(show = true), showFn(item.track.name, item.track.artists, item.track.album)" round icon="ellipsis"></van-button>
           </van-row>
         </van-cell>
       </van-list>
       <!-- 动作面板 -->
-      <van-action-sheet v-model="show" :actions="actions" cancel-text="取消" close-on-click-action safe-area-inset-bottom>
+      <van-action-sheet v-model="show" :actions="actions" @select="onSelect" cancel-text="取消" close-on-click-action safe-area-inset-bottom>
         <template #description>
           <p></p>
           <van-image :src="showAlbum && showAlbum.images[0].url" fit="cover" height="256" width="256"
@@ -83,21 +112,34 @@
 <script>
   import EventBus from "../utils/EventBus"
   export default {
+    name: "tracklist",
+    props: {
+      playlistId: {
+        type: String,
+      },
+    },
     data() {
       return {
-        show: false,
-        searchInput: "",
-        searchValue: "",
-        searchQuery: "",
-        timer: 0,
-        allowSearch: true,
-        // list组件参数
+        // list组件
         list: [],
         offset: 0,
         loading: false,
         finished: false,
+        // 滚动距离
+        scrollTop: 0,
         // 动作面板
+        show: false,
         actions: [{ name: "查看专辑", icon: "star-o" }, { name: "查看艺人" }, { name: "添加到歌单" }],
+        // 搜索栏
+        searchValue: "",
+        // 歌单信息
+        total: 0,
+        // 双击标题返回
+        counter: 0,
+        timer: 0,
+        // 列表相关
+        listName: "",
+        // 播放相关
         currentRate: 0,
         defaultVolume: 50,
         isPlaying: false,
@@ -113,77 +155,83 @@
       }
     },
     methods: {
+      // 导航
+      go(dest, playlistId) {
+        this.$emit("go", dest, playlistId)
+      },
+      backward() {
+        this.$emit("backward")
+      },
+      onSelect(item) {
+        console.log(item)
+      },
       onLoad() {
-        this.searchValue = this.searchInput
-
-        if (!this.searchValue) {
-          this.list = []
-          this.offset = 0
-          this.loading = false
-          return
-        }
-        if (this.searchQuery !== this.searchValue) {
-          this.list = []
-          this.offset = 0
-          this.loading = false
-        }
-
+        // 如果没有在使用AccessToken，不执行
+        if (!this.$spotifyApi.getAccessToken()) return
         console.log("获取歌曲列表！")
-        this.$spotifyApi.search(this.searchValue, ["track", "artist"], { offset: this.offset, limit: 40, include_external: "audio" }, (err, data) => {
+        this.$spotifyApi.getMySavedTracks({}, (err, data) => {
           if (err) {
             // ❌ 报错
-            // console.error(err)
+            console.error(err)
             // 如果token过期
-            // if (err.status === 401) alert("token过期")
-            // 获取新token
+            if (err.status === 401) this.$spotifyApi.goAuth()
+            // 刷新token
             this.$spotifyApi.refreshToken()
-            // 重新设置token
-            this.$spotifyApi.setAccessToken(localStorage.getItem("vue_spotify_token"))
 
             // 加载状态结束
             this.loading = false
+            return this.$spotifyApi.setAccessToken(null)
           } else {
             // ✅ 成功
-
             console.log("歌曲列表", data)
+            const tracks = data.tracks
+
+            // 拿到歌名
+            this.listName = data.name
 
             // 添加歌曲总数到变量
-            this.total = data.tracks.total
+            this.total = tracks.total
 
             // 添加数据到数组
-            this.list.push(...data.tracks.items)
+            this.list.push(...tracks.items)
 
             // 加载状态结束
             this.loading = false
-
-            // 请求完成后，保存搜索请求
-            this.searchQuery = this.searchValue
 
             // 请求完后，曲目开始数后移40位
             this.offset += 40
             // 数据全部加载完成
-            if (data.length < 40) {
+            if (this.list.length >= this.total) {
+              console.log(1)
               this.finished = true
             }
           }
         })
       },
-      input() {
-        // 防抖
-        if (this.allowSearch) {
-          this.allowSearch = false
+      scroll() {
+        this.scrollTop = this.$refs.tracklist.scrollTop <= 1000 ? this.$refs.tracklist.scrollTop : 1000
+      },
+      // 绑定双击方法，用于双击标题栏时页面回到顶部
+      onClick() {
+        this.counter++
+        if (this.counter == 1) {
           this.timer = setTimeout(() => {
-            this.allowSearch = true
-            // 空值时不搜索
-            this.onLoad()
-            clearTimeout(this.timer)
-          }, 1000)
+            this.counter = 0
+          }, 300)
+          return
         }
+        clearTimeout(this.timer)
+        this.counter = 0
+        window.scrollTo({
+          top: 0,
+          left: 0,
+          behavior: "smooth",
+        })
       },
       play(order) {
         EventBus.$emit("playOrder", order)
         this.playingId = order.id
-        console.log("order:")
+        console.log("order")
         console.log(order)
       },
       showFn(name, artists, album) {
@@ -200,9 +248,8 @@
         this.currentRate = time
       })
       // 获得播放状态
-      EventBus.$on("playState", (state) => {
-        this.isPlaying = state.isPlaying
-        this.playingId = state.id
+      EventBus.$on("playState", (isPlaying) => {
+        this.isPlaying = isPlaying
       })
       // 获得等待播放曲目
       EventBus.$on("queue", (id) => {
@@ -212,17 +259,29 @@
   }
 </script>
 
-<style lang="less" scoped>
-  .van-search {
+<style lang="less">
+  .page-title {
+    & > * {
+      box-sizing: border-box;
+      margin: 16px 16px;
+    }
+    p {
+      color: #666;
+      font-size: 14px;
+    }
+  }
+  .fixed-nav {
     position: fixed;
     top: 0;
-    left: 0;
-    width: 100%;
+  }
+  .van-nav-bar {
     height: 60px;
-    z-index: 1;
+    .van-nav-bar__content {
+      height: 60px;
+    }
   }
   .track-list-container {
-    padding-bottom: 50px;
+    padding: 0 0 70px 0;
     .track-list {
       .track-item {
         padding-top: 6px;
@@ -269,7 +328,6 @@
             }
             .artist-name-container {
               opacity: 0.6;
-
               .artist-name + .artist-name::before {
                 content: "·";
               }

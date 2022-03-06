@@ -16,16 +16,17 @@
         defaultVolume: 50,
         playPromise: null,
         isPlaying_local: false,
-        playingId_local: "",
-        playingName_local: "Vue-Spotify-Mobile",
-        playingUrl_local: "",
-        playingArtists_local: [],
-        playingAlbum_local: [],
+        playingId: "",
+        playingName: "Vue-Spotify-Mobile",
+        playingUrl: "",
+        playingArtists: [],
+        playingAlbum: [],
         inQueueId_local: "",
         inQueueUrl: "",
         ready: true,
         playingList: [],
         playingIndex: 0,
+        playingListName: "",
       }
     },
     computed: {
@@ -35,9 +36,8 @@
         },
         set(boolean) {
           this.isPlaying_local = boolean
-          EventBus.$emit("playState", boolean)
           this.$nextTick(() => {
-            this.$emit("playState", {
+            EventBus.$emit("playState", {
               url: this.playingUrl,
               id: this.playingId,
               name: this.playingName,
@@ -46,6 +46,7 @@
               isPlaying: boolean,
               list: this.playingList,
               index: this.playingIndex,
+              listName: this.playingListName,
             })
           })
         },
@@ -71,7 +72,7 @@
     },
 
     methods: {
-      play(url, id, name, artists, album, list, index, direction) {
+      play(url, id, name, artists, album, list, index, direction, listName) {
         // 如果没有url,跳过
         if (!url) {
           direction === "next" ? this.playingIndex++ : this.playingIndex--
@@ -127,6 +128,7 @@
               this.playingAlbum = album
               this.playingList = list
               this.playingIndex = index
+              this.playingListName = listName
             })
           }
         }
@@ -147,7 +149,7 @@
         let artists = track.artists.map((v) => {
           return v.name
         })
-        this.play(track.preview_url, track.id, track.name, artists, track.album, this.playingList, to, "prev")
+        this.play(track.preview_url, track.id, track.name, artists, track.album, this.playingList, to, "prev", this.playingListName)
       },
       next() {
         let to = this.playingIndex + 1
@@ -158,7 +160,7 @@
         let artists = track.artists.map((v) => {
           return v.name
         })
-        this.play(track.preview_url, track.id, track.name, artists, track.album, this.playingList, to, "next")
+        this.play(track.preview_url, track.id, track.name, artists, track.album, this.playingList, to, "next", this.playingListName)
       },
     },
     mounted() {
@@ -169,7 +171,7 @@
         order.artists = order.artists.map((v) => {
           return v.name
         })
-        this.play(order.url, order.id, order.name, order.artists, order.album, order.list, order.index)
+        this.play(order.url, order.id, order.name, order.artists, order.album, order.list, order.index, "", order.listName)
       })
     },
   }

@@ -25,7 +25,7 @@
     </div>
     <!-- 大面板 -->
     <div class="large" ref="large" @click.prevent.stop="expanded ? '' : expand()" @touchstart="touchStart" @touchmove.prevent.stop="drag" @touchend="touchEnd">
-      <van-nav-bar title="Spotify">
+      <van-nav-bar :title="state.listName">
         <template #left>
           <van-icon name="arrow-down" size="18" @click.stop="close" />
         </template>
@@ -50,11 +50,12 @@
         </div>
       </div>
     </div>
-    <audio-player ref="player" @currentRate="getRate" @playState="playState"></audio-player>
+    <audio-player ref="player" @currentRate="getRate"></audio-player>
   </div>
 </template>
 
 <script>
+  import EventBus from "../utils/EventBus.js"
   import AudioPlayer from "@/components/audio-player.vue"
   import { gsap } from "gsap"
 
@@ -76,6 +77,7 @@
           artists: ["by Mickey-Luo@Github"],
           album: {},
           isPlaying: false,
+          listName: "",
         },
         panelY: null,
         originalHeight: null,
@@ -84,12 +86,8 @@
         expanded: false,
       }
     },
-    mounted() {},
     computed: {},
     methods: {
-      playState(state) {
-        this.state = { ...state }
-      },
       play() {
         this.isPlaying = true
         this.$refs.player.play(this.state.url, this.state.id)
@@ -194,6 +192,12 @@
         this.expanded = false
       },
     },
+    mounted() {
+      EventBus.$on("playState", (state) => {
+        console.log(state)
+        this.state = { ...state }
+      })
+    },
   }
 </script>
 
@@ -205,11 +209,15 @@
     bottom: 0;
     z-index: 1;
     .mini {
-      position: relative;
+      position: absolute;
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
       box-sizing: border-box;
       overflow: hidden;
       margin: 0 auto;
       padding: 4px 8px;
+      width: 100%;
       max-width: 92%;
       height: 54px;
       background-color: #f2f2f2f9;
