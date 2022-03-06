@@ -8,9 +8,11 @@
     </van-row>
     <div class="grid" clickable>
       <div class="grid-item" @click="go('tracklist', 'my')"><van-icon name="like" size="18px" />已点赞的歌</div>
-      <div class="grid-item" @click="go('tracklist', 'my')"><van-icon name="like" size="18px" />已点赞的歌</div>
-      <div class="grid-item" @click="go('tracklist', 'my')"><van-icon name="like" size="18px" />已点赞的歌</div>
-      <div class="grid-item" @click="go('tracklist', 'my')"><van-icon name="like" size="18px" />已点赞的歌</div>
+      <div class="grid-item" @click="go('tracklist', 'my')"><van-icon name="like" size="18px" />Playlist</div>
+      <div class="grid-item" @click="go('tracklist', 'my')"><van-icon name="like" size="18px" />Playlist</div>
+      <div class="grid-item" @click="go('tracklist', 'my')"><van-icon name="like" size="18px" />Playlist</div>
+      <div class="grid-item" @click="go('tracklist', 'my')"><van-icon name="like" size="18px" />Playlist</div>
+      <div class="grid-item" @click="go('tracklist', 'my')"><van-icon name="like" size="18px" />Playlist</div>
     </div>
     <!-- 列表 -->
     <list-scroll v-for="(playlists, index) in listCollection" :key="index" :playlists="playlists" @go="go"></list-scroll>
@@ -114,17 +116,16 @@
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
-    gap: 10px;
-    height: 120px;
+    gap: 7px 14px;
     margin: 20px 0;
 
     .grid-item {
-      width: 44%;
-      height: 50px;
+      width: 40%;
+      height: 44px;
+      padding: 0 0 0 14px;
       display: flex;
       align-items: center;
-      gap: 7px;
-      justify-content: center;
+      gap: 14px;
       background-color: #f2f2f2f9;
       border-radius: 8px;
 

@@ -92,6 +92,7 @@
               </div>
             </van-col>
             <!-- 动作图标 -->
+            <van-button @click.stop="" round :icon="item.saved ? 'like' : 'like-o'"></van-button>
             <van-button @click.stop=";(show = true), showFn(item.track.name, item.track.artists, item.track.album)" round icon="ellipsis"></van-button>
           </van-row>
         </van-cell>
@@ -207,7 +208,8 @@
 
             // 添加数据到数组
             this.list.push(...tracks.items)
-
+            // 检查是否点赞
+            this.checkSaved(tracks.items)
             // 加载状态结束
             this.loading = false
 
@@ -223,6 +225,26 @@
           this.$spotifyApi.getMySavedTracks({ limit: 40, offset: this.offset }, callback)
         } else this.$spotifyApi.getPlaylist(this.playlistId, { limit: 40, offset: this.offset }, callback)
       },
+      // 检查有无点赞
+      checkSaved(items) {
+        const arr = items.map((v) => {
+          return v.track.id
+        })
+        console.log(arr)
+        this.$spotifyApi.containsMySavedTracks(arr, {}, (err, data) => {
+          if (err) console.log(err)
+          else {
+            console.log(data)
+            this.list.forEach((v) => {
+              if (v.saved === undefined) {
+                v.saved = data.unshift()
+                this.$forceUpdate()
+              }
+            })
+          }
+        })
+      },
+      toggleSaved() {},
       onScroll() {
         let cover = this.$refs.cover
         let title = this.$refs.title
@@ -230,13 +252,9 @@
         let list = this.$refs.list
         let bar = this.$refs.bar.$el
         this.scrollTop = this.$refs.tracklist.scrollTop <= 1000 ? this.$refs.tracklist.scrollTop : 1000
-        console.log(this.scrollTop)
         if (tracklist.scrollTop < 500) {
           cover && gsap.set(cover, { scale: (100 - tracklist.scrollTop / 3) / 100 })
           gsap.set(bar, { backgroundColor: `rgba(255, 255, 255,${tracklist.scrollTop / 3 / 100})` })
-          // console.log(1)
-          // console.dir(list.scroller.scrollTop)
-          // console.dir(list.$el.offsetTop)
           // console.log(list.$el.offsetTop - list.scroller.scrollTop)
           // 列表到顶部的距离
           if (list.$el.offsetTop - list.scroller.scrollTop >= 120) {
