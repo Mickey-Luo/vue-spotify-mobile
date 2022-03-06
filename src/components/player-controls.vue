@@ -7,7 +7,7 @@
     }"
   >
     <!-- 小面板 -->
-    <div class="mini" ref="mini" @click.prevent.stop="expanded ? '' : expand()" @touchstart="touchStart" @touchmove.prevent.stop="drag" @touchend="touchEnd">
+    <div class="mini" ref="mini" @click.stop="expanded ? '' : expand()" @touchstart="touchStart" @touchmove.stop="drag" @touchend="touchEnd">
       <div class="track-cover">
         <img :src="Object.keys(state.album).length !== 0 ? state.album.images[1].url : ''" v-show="Object.keys(state.album).length !== 0" />
       </div>
@@ -24,7 +24,7 @@
       </div>
     </div>
     <!-- 大面板 -->
-    <div class="large" ref="large" @click.prevent.stop="expanded ? '' : expand()" @touchstart="touchStart" @touchmove.prevent.stop="drag" @touchend="touchEnd">
+    <div class="large" ref="large" @click.stop="expanded ? '' : expand()" @touchstart="touchStart" @touchmove.stop="drag" @touchend="touchEnd">
       <van-nav-bar :title="state.listName">
         <template #left>
           <van-icon name="arrow-down" size="18" @click.stop="close" />
@@ -213,6 +213,7 @@
       position: absolute;
       top: 0;
       left: 50%;
+      z-index: 1;
       transform: translateX(-50%);
       box-sizing: border-box;
       overflow: hidden;
