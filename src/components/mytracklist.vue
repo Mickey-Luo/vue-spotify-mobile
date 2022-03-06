@@ -1,36 +1,46 @@
 <template>
-  <div ref="tracklist" id="tracklist" @scroll="onScroll">
+  <div ref="tracklist" id="tracklist" @scroll="scroll">
+    <!-- <van-row type="flex" justify="space-between">
+      <van-col span="6">晚上好</van-col>
+      <van-col span="6"
+        ><van-icon name="bullhorn-o" /><van-icon name="clock-o" /><van-icon name="setting-o"
+      /></van-col>
+    </van-row> -->
     <!-- 标题栏1 -->
-    <van-nav-bar ref="bar" :border="false" left-arrow @click-left="backward">
-      <template #title>
-        <p ref="title" @click.stop="onClick">
-          {{ listName }}
-        </p>
-      </template></van-nav-bar
-    >
+    <van-nav-bar class="fixed-nav" left-arrow @click-left="backward" />
+    <!-- 标题栏2 -->
+    <van-sticky>
+      <van-nav-bar ref="bar" :border="false" left-arrow @click-left="backward" :style="{ opacity: scrollTop > 1000 ? 1 : scrollTop / 250 }">
+        <template #title>
+          <p
+            @click="onClick"
+            :style="{
+              opacity: scrollTop > 1000 ? 1 : (scrollTop - 150) / 50,
+              transform: scrollTop > 1000 ? 'none' : 'translateY(' + 80 / (scrollTop - 150) + 'px)',
+            }"
+          >
+            已点赞的歌曲
+          </p>
+        </template></van-nav-bar
+      >
+    </van-sticky>
     <!-- 搜索框 -->
-    <!-- <van-search v-model="searchValue" show-action shape="round" placeholder="请输入搜索关键词" :style="{ opacity: 1 - (scrollTop - 5) / 25 }">
+    <van-search
+      v-model="searchValue"
+      show-action
+      shape="round"
+      placeholder="请输入搜索关键词"
+      :style="{ opacity: scrollTop > 1000 ? 0 : 1 - (scrollTop - 5) / 25 }"
+    >
       <template #action>
+        <!-- <div @click="onSearch">搜索</div> -->
         <div>排序</div>
       </template>
-    </van-search> -->
+    </van-search>
     <!-- 歌单信息 -->
-    <div
-      v-if="backgroundImage"
-      class="cover"
-      ref="cover"
-      :style="{
-        background: 'no-repeat center top/50% url(' + backgroundImage + ') ',
-        height: backgroundImage ? '52vw' : '',
-      }"
-    ></div>
-    <div v-if="backgroundImage" class="page-title">
-      <p v-html="this.description"></p>
-    </div>
-    <div v-else class="page-title" style="margin-top: 60px" :style="{ opacity: 1 - scrollTop / 60 }">
-      <h2>{{ listName }}</h2>
+    <div class="page-title" :style="{ opacity: scrollTop > 1000 ? 0 : 1.1 - (scrollTop - 50) / 80 }">
+      <h2>已点赞的歌曲</h2>
       <p>{{ total.toLocaleString() }} 首歌曲</p>
-      <!-- <p v-html="this.description"></p> -->
     </div>
     <!-- 歌单 list -->
     <div class="track-list-container">
@@ -38,7 +48,7 @@
         <!-- 曲目单元 -->
         <van-cell
           class="track-item"
-          v-for="(item, index) in list"
+          v-for="item in list"
           v-lazy="item.track.album.images[1].url"
           :key="item.track.id"
           clickable
@@ -50,9 +60,6 @@
                   name: item.track.name,
                   artists: item.track.artists,
                   album: item.track.album,
-                  list: list,
-                  index: index,
-                  listName: listName,
                 })
               : ''
           "
@@ -77,7 +84,8 @@
                 :rate="0"
               >
                 <!-- 播放 - 暂停 -->
-                <van-icon v-if="isPlaying || playingId === item.track.id" :name="isPlaying ? 'pause' : 'play'" size="27px" color="#1fd760" />
+                <van-icon v-if="!isPlaying && playingId === item.track.id" name="play" size="27px" color="#1fd760" />
+                <van-icon v-if="isPlaying && playingId === item.track.id" name="pause" size="27px" color="#1fd760" />
                 <!-- 加载图标 -->
                 <van-loading v-if="playingId === item.track.id && inQueueId === item.track.id" />
               </van-circle>
@@ -97,7 +105,7 @@
         </van-cell>
       </van-list>
       <!-- 动作面板 -->
-      <van-action-sheet v-model="show" :actions="actions" @select="onSelect" cancel-text="取消" close-on-click-action safe-area-inset-bottom>
+      <van-action-sheet v-model="show" :actions="actions" cancel-text="取消" close-on-click-action safe-area-inset-bottom>
         <template #description>
           <p></p>
           <van-image :src="showAlbum && showAlbum.images[0].url" fit="cover" height="256" width="256"
@@ -115,39 +123,23 @@
 
 <script>
   import EventBus from "../utils/EventBus"
-  import { gsap } from "gsap"
-
   export default {
     name: "tracklist",
-    props: {
-      playlistId: {
-        type: String,
-      },
-    },
     data() {
       return {
-        // list组件
+        // list组件参数
         list: [],
         offset: 0,
         loading: false,
         finished: false,
         // 滚动距离
         scrollTop: 0,
-        // 动作面板
         show: false,
         actions: [{ name: "查看专辑", icon: "star-o" }, { name: "查看艺人" }, { name: "添加到歌单" }],
-        // 搜索栏
         searchValue: "",
-        // 歌单信息
         total: 0,
-        description: "",
-        backgroundImage: "",
-        // 双击标题返回
         counter: 0,
         timer: 0,
-        // 列表相关
-        listName: "",
-
         // 播放相关
         currentRate: 0,
         defaultVolume: 50,
@@ -164,24 +156,18 @@
       }
     },
     methods: {
-      // 导航
-      go(dest, playlistId) {
-        this.$emit("go", dest, playlistId)
-      },
       backward() {
         this.$emit("backward")
       },
-      onSelect(item) {
-        console.log(item)
-      },
       onLoad() {
         // 如果没有在使用AccessToken，不执行
+        console.log(this.$spotifyApi.getAccessToken())
         if (!this.$spotifyApi.getAccessToken()) return
         console.log("获取歌曲列表！")
-        let callback = (err, data) => {
+        this.$spotifyApi.getMySavedTracks({ offset: this.offset, limit: 40 }, (err, data) => {
           if (err) {
             // ❌ 报错
-            console.error(err)
+            // console.error(err)
             // 如果token过期
             if (err.status === 401) this.$spotifyApi.goAuth()
             // 刷新token
@@ -193,20 +179,12 @@
           } else {
             // ✅ 成功
             console.log("歌曲列表", data)
-            // 如果没有tracks，而直接是items，处理一下
-            if (!data.tracks && data.items) data.tracks = data
-            const tracks = data.tracks
 
-            // 拿到歌单名
-            this.listName = data.name || "已点赞的歌"
-            // 歌单详情
-            this.description = data.description || ""
-            data.images && (this.backgroundImage = data.images[0].url)
             // 添加歌曲总数到变量
-            this.total = tracks.total
+            this.total = data.total
 
             // 添加数据到数组
-            this.list.push(...tracks.items)
+            this.list.push(...data.items)
 
             // 加载状态结束
             this.loading = false
@@ -214,37 +192,14 @@
             // 请求完后，曲目开始数后移40位
             this.offset += 40
             // 数据全部加载完成
-            if (this.list.length >= this.total) {
+            if (data.length < 40) {
               this.finished = true
             }
           }
-        }
-        if (this.playlistId === "my") {
-          this.$spotifyApi.getMySavedTracks({ limit: 40, offset: this.offset }, callback)
-        } else this.$spotifyApi.getPlaylist(this.playlistId, { limit: 40, offset: this.offset }, callback)
+        })
       },
-      onScroll() {
-        let cover = this.$refs.cover
-        let title = this.$refs.title
-        let tracklist = this.$refs.tracklist
-        let list = this.$refs.list
-        let bar = this.$refs.bar.$el
+      scroll() {
         this.scrollTop = this.$refs.tracklist.scrollTop <= 1000 ? this.$refs.tracklist.scrollTop : 1000
-        console.log(this.scrollTop)
-        if (tracklist.scrollTop < 500) {
-          cover && gsap.set(cover, { scale: (100 - tracklist.scrollTop / 3) / 100 })
-          gsap.set(bar, { backgroundColor: `rgba(255, 255, 255,${tracklist.scrollTop / 3 / 100})` })
-          // console.log(1)
-          // console.dir(list.scroller.scrollTop)
-          // console.dir(list.$el.offsetTop)
-          // console.log(list.$el.offsetTop - list.scroller.scrollTop)
-          // 列表到顶部的距离
-          if (list.$el.offsetTop - list.scroller.scrollTop >= 120) {
-            gsap.set(title, { transform: `translateY(${list.$el.offsetTop - list.scroller.scrollTop - 120}px)` })
-          } else {
-            gsap.set(title, { transform: `translateY(0px)` })
-          }
-        }
       },
       // 绑定双击方法，用于双击标题栏时页面回到顶部
       onClick() {
@@ -283,9 +238,8 @@
         this.currentRate = time
       })
       // 获得播放状态
-      EventBus.$on("playState", (state) => {
-        this.isPlaying = state.isPlaying
-        this.playingId = state.id
+      EventBus.$on("playState", (isPlaying) => {
+        this.isPlaying = isPlaying
       })
       // 获得等待播放曲目
       EventBus.$on("queue", (id) => {
@@ -295,7 +249,7 @@
   }
 </script>
 
-<style lang="less" scoped>
+<style lang="less">
   .page-title {
     & > * {
       box-sizing: border-box;
@@ -306,26 +260,18 @@
       font-size: 14px;
     }
   }
-
-  /deep/ .van-nav-bar {
+  .fixed-nav {
     position: fixed;
     top: 0;
-    width: 100%;
+  }
+  .van-nav-bar {
     height: 60px;
-    background-color: #fff0;
     .van-nav-bar__content {
       height: 60px;
-      .van-nav-bar__title p {
-        transform: translateY(100%);
-      }
     }
   }
-
-  .cover {
-    margin-top: 23px;
-  }
   .track-list-container {
-    padding: 0 0 70px 0;
+    // padding: 60px 0;
     .track-list {
       .track-item {
         padding-top: 6px;
@@ -333,6 +279,7 @@
         height: 80px;
         .track-item-flexbox {
           flex-wrap: nowrap;
+
           height: 68px;
           .play-control {
             position: relative;
