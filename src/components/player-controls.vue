@@ -7,7 +7,7 @@
     }"
   >
     <!-- 小面板 -->
-    <div class="mini" ref="mini" @click.prevent.stop="expanded ? '' : expand()" @touchstart="touchStart" @touchmove.prevent.stop="drag" @touchend="touchEnd">
+    <div class="mini" ref="mini" @click.stop="expanded ? '' : expand()" @touchstart.prevent="touchStart" @touchmove.prevent.stop="drag" @touchend="touchEnd">
       <div class="track-cover">
         <img :src="Object.keys(state.album).length !== 0 ? state.album.images[1].url : ''" v-show="Object.keys(state.album).length !== 0" />
       </div>
@@ -24,30 +24,29 @@
       </div>
     </div>
     <!-- 大面板 -->
-    <div class="large" ref="large" @click.prevent.stop="expanded ? '' : expand()" @touchstart="touchStart" @touchmove.prevent.stop="drag" @touchend="touchEnd">
+    <div class="large" ref="large" @click.stop="expanded ? '' : expand()" @touchstart.prevent="touchStart" @touchmove.prevent.stop="drag" @touchend="touchEnd">
       <van-nav-bar :title="state.listName">
         <template #left>
           <van-icon name="arrow-down" size="18" @click.stop="close" />
         </template>
       </van-nav-bar>
       <div class="container">
+        <h2></h2>
         <div class="track-cover">
           <img :src="Object.keys(state.album).length !== 0 ? state.album.images[1].url : ''" v-show="Object.keys(state.album).length !== 0" />
         </div>
-        <div class="sub-container">
-          <div class="track-detail" ref="detail">
-            <p class="name van-ellipsis">{{ state.name }}</p>
-            <p class="artists van-ellipsis">{{ state.artists.join(" · ") }}</p>
-          </div>
-          <div class="progress">
-            <van-progress :percentage="currentRate" color="#1fd760" stroke-width="4" :show-pivot="false" />
-          </div>
-          <div class="play-button">
-            <van-icon name="arrow-left" size="58" @click.stop="prev" />
-            <van-icon v-if="!state.isPlaying" @click.stop="!state.url || play()" name="play-circle-o" size="58" />
-            <van-icon v-if="state.isPlaying" @click.stop="!state.url || pause()" name="pause-circle-o" size="58" />
-            <van-icon name="arrow" @click.stop="next" size="58" />
-          </div>
+        <div class="track-detail" ref="detail">
+          <p class="name van-ellipsis">{{ state.name }}</p>
+          <p class="artists van-ellipsis">{{ state.artists.join(" · ") }}</p>
+        </div>
+        <div class="progress">
+          <van-progress :percentage="currentRate" color="#1fd760" stroke-width="8" :show-pivot="false" />
+        </div>
+        <div class="play-button">
+          <van-icon name="arrow-left" size="58" @click.stop="prev" />
+          <van-icon v-if="!state.isPlaying" @click.stop="!state.url || play()" name="play-circle-o" size="58" />
+          <van-icon v-if="state.isPlaying" @click.stop="!state.url || pause()" name="pause-circle-o" size="58" />
+          <van-icon name="arrow" @click.stop="next" size="58" />
         </div>
       </div>
     </div>
@@ -214,6 +213,7 @@
       z-index: 1;
       top: 0;
       left: 50%;
+      z-index: 2042;
       transform: translateX(-50%);
       box-sizing: border-box;
       overflow: hidden;
@@ -269,52 +269,47 @@
     // 大面板
     .large {
       opacity: 0;
-      height: 100%;
-      display: flex;
-      flex-direction: column;
       .van-nav-bar {
         background-color: #fff0;
       }
       .container {
-        flex: 1;
         width: 92%;
-        height: calc(100%-60px);
         margin: 0 auto;
         .track-cover {
           width: 92vw;
           height: 92vw;
+          margin: 40px auto 0;
           background-color: #fff;
           img {
-            width: 100%;
             height: 100%;
+            width: 100%;
           }
         }
-        .sub-container {
-          // flex: 1;
-          .track-detail {
-            height: 38px;
-            margin: 48px 0 26px 0;
-            .name {
-              font-size: 24px;
-              line-height: 32px;
-            }
-            .artists {
-              font-weight: 300;
-              font-size: 14px;
-              line-height: 18px;
-            }
+        .track-detail {
+          height: 38px;
+          margin: 22px 0;
+          .name {
+            font-size: 24px;
+            line-height: 32px;
+            margin-bottom: 4px;
           }
-          .progress {
-            width: 100%;
+          .artists {
+            font-weight: 300;
+            font-size: 18px;
+            line-height: 18px;
           }
-          .play-button {
-            display: flex;
-            justify-content: center;
-            gap: 25px;
-            width: 80px;
-            margin: 30px auto 0;
-            text-align: center;
-          }
+        }
+        .progress {
+          width: 100%;
+          margin-top: 40px;
+        }
+        .play-button {
+          display: flex;
+          justify-content: center;
+          gap: 25px;
+          width: 80px;
+          margin: 30px auto 0;
+          text-align: center;
         }
       }
     }
