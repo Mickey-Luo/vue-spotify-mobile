@@ -63,8 +63,9 @@
 
 <style lang="less">
   * {
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Fira Sans", "Droid Sans", "Microsoft YaHei", "Heiti SC",
-      "Helvetica Neue", "Hiragino Kaku Gothic Pro", Meiryo, "MS Gothic", sans-serif;
+    font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", Helvetica, Arial, "Microsoft Yahei", "Hiragino Sans GB", "Heiti SC", "WenQuanYi Micro Hei",
+      sans-serif;
+
     margin: 0;
     padding: 0;
   }

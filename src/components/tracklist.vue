@@ -385,7 +385,7 @@
               color: #aaa;
             }
             .track-name {
-              font-weight: 500;
+              font-weight: 400;
               line-height: 17px;
             }
             .artist-name-container {
