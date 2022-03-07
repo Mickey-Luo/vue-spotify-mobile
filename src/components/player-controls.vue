@@ -11,9 +11,23 @@
       <div class="track-cover">
         <img :src="Object.keys(state.album).length !== 0 ? state.album.images[1].url : ''" v-show="Object.keys(state.album).length !== 0" />
       </div>
+      <!-- 曲名/艺人名 -->
       <div class="track-detail">
-        <p class="name van-ellipsis">{{ state.name }}</p>
-        <p class="artists van-ellipsis">{{ state.artists.join(" · ") }}</p>
+        <div class="container" ref="mini_detail" @touchstart.prevent="mini_touchStart" @touchmove.prevent="mini_drag" @touchend.prevent="mini_touchEnd">
+          <div class="track-detail-item">
+            <p class="name van-ellipsis">{{ prevTrack.name }}</p>
+            <p class="artists van-ellipsis">{{ prevTrack.artists.join(" · ") }}</p>
+          </div>
+          <div class="track-detail-item">
+            <p class="name van-ellipsis">{{ state.name }}</p>
+            <p class="artists van-ellipsis">{{ state.artists.join(" · ") }}</p>
+          </div>
+
+          <div class="track-detail-item">
+            <p class="name van-ellipsis">{{ nextTrack.name }}</p>
+            <p class="artists van-ellipsis">{{ nextTrack.artists.join(" · ") }}</p>
+          </div>
+        </div>
       </div>
       <div class="play-button">
         <van-icon v-if="!state.isPlaying" @click.stop="!state.url || expanded ? '' : play()" name="play" size="28px" />
@@ -79,8 +93,34 @@
           album: {},
           isPlaying: false,
           listName: "",
+          list: [],
         },
+        prevTrack: {
+          url: "",
+          id: "",
+          name: "",
+          artists: [],
+          album: {},
+          index: 0,
+        },
+        nextTrack: {
+          url: "",
+          id: "",
+          name: "",
+          artists: [],
+          album: {},
+          index: 0,
+        },
+
+        // mini
+        miniDistance: null,
+        miniOffsetWidth: null,
+        originalOffsetX: null,
+        nowOffsetX: null,
+        touchStartX: null,
+        // large
         panelY: null,
+        touchStartY: null,
         originalHeight: null,
         nowHeight: null,
         distance: 0,
@@ -106,6 +146,42 @@
       getRate(val) {
         this.currentRate = val
       },
+      // mini
+      mini_touchStart(e) {
+        console.log(e)
+        console.dir(this.$refs.mini_detail)
+        this.miniOffsetWidth || (this.miniOffsetWidth = this.$refs.mini_detail.offsetWidth)
+        this.touchStartX = e.touches[0].pageX
+        if (this.originalOffsetX === null) {
+          this.originalOffsetX = this.$refs.mini_detail.offsetLeft
+        }
+        this.nowOffsetX = this.$refs.panel.offsetHeight
+      },
+      mini_drag(e) {
+        let detail = this.$refs.mini_detail
+        this.miniDistance = e.touches[0].pageX - this.touchStartX
+        console.log("distance: " + this.miniDistance)
+        gsap.set(detail, { x: this.miniDistance })
+      },
+      mini_touchEnd() {
+        let detail = this.$refs.mini_detail
+        if (this.miniDistance > 80) {
+          console.log(this.miniOffsetWidth)
+          gsap.to(detail, { x: this.miniOffsetWidth })
+          setTimeout(() => {
+            this.prev()
+          }, 500)
+        } else if (this.miniDistance < -80) {
+          gsap.to(detail, { x: -this.miniOffsetWidth })
+          setTimeout(() => {
+            this.next()
+          }, 500)
+        } else {
+          gsap.to(detail, { x: 0 })
+        }
+        this.distance = 0
+      },
+      // large
       touchStart(e) {
         this.touchStartY = e.touches[0].pageY
         if (this.originalHeight === null) {
@@ -114,6 +190,7 @@
         }
         this.nowHeight = this.$refs.panel.offsetHeight
       },
+
       drag(e) {
         let tabbar = this.$parent.$refs.tabbar.$el
         let panel = this.$refs.panel
@@ -194,9 +271,13 @@
       },
     },
     mounted() {
-      EventBus.$on("playState", (state) => {
+      EventBus.$on("playState", (state, prevTrack, nextTrack) => {
         console.log(state)
+        let detail = this.$refs.mini_detail
+        gsap.set(detail, { x: 0 })
         this.state = { ...state }
+        this.prevTrack = { ...prevTrack }
+        this.nextTrack = { ...nextTrack }
       })
     },
   }
@@ -245,15 +326,25 @@
         flex: 1;
         max-width: 75%;
         height: 38px;
-        .name {
-          font-size: 14px;
-          line-height: 14px;
-          margin-bottom: 4px;
-        }
-        .artists {
-          font-weight: 300;
-          font-size: 12px;
-          line-height: 12px;
+        overflow: hidden;
+        .container {
+          display: flex;
+          justify-content: center;
+
+          & .track-detail-item {
+            width: 100%;
+            flex-shrink: 0;
+            .name {
+              font-size: 14px;
+              line-height: 14px;
+              margin-bottom: 4px;
+            }
+            .artists {
+              font-weight: 300;
+              font-size: 12px;
+              line-height: 12px;
+            }
+          }
         }
       }
       .play-button {

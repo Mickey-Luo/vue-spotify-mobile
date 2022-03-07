@@ -37,7 +37,7 @@
         set(boolean) {
           this.isPlaying_local = boolean
           this.$nextTick(() => {
-            EventBus.$emit("playState", {
+            let state = {
               url: this.playingUrl,
               id: this.playingId,
               name: this.playingName,
@@ -47,7 +47,41 @@
               list: this.playingList,
               index: this.playingIndex,
               listName: this.playingListName,
-            })
+            }
+            // prev
+            let prevIndex = this.playingIndex - 1
+            if (this.playingIndex === 0) {
+              prevIndex = this.playingList.length - 1
+            }
+
+            // next
+            let nextIndex = this.playingIndex + 1
+            if (this.playingIndex === this.playingList.length - 1) {
+              nextIndex = 0
+            }
+            // [artists] => [artist.name]
+            const prevArtists = this.playingList[prevIndex].track.artists.map((v) => v.name)
+            const nextArtists = this.playingList[nextIndex].track.artists.map((v) => v.name)
+
+            let prevTrack = {
+              url: this.playingList[prevIndex].track.preview_url,
+              id: this.playingList[prevIndex].track.id,
+              name: this.playingList[prevIndex].track.name,
+              artists: prevArtists,
+              album: this.playingList[prevIndex].track.album,
+              index: prevIndex,
+            }
+            let nextTrack = {
+              url: this.playingList[nextIndex].track.preview_url,
+              id: this.playingList[nextIndex].track.id,
+              name: this.playingList[nextIndex].track.name,
+              artists: nextArtists,
+              album: this.playingList[nextIndex].track.album,
+              index: nextIndex,
+            }
+
+            // emit
+            EventBus.$emit("playState", state, prevTrack, nextTrack)
           })
         },
       },
