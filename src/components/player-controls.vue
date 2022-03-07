@@ -7,25 +7,28 @@
     }"
   >
     <!-- 小面板 -->
-    <div class="mini" ref="mini" @click.prevent.stop="expanded ? '' : expand()" @touchstart="touchStart" @touchmove.prevent.stop="drag" @touchend="touchEnd">
+    <div class="mini" ref="mini" @click.prevent.stop="expanded ? '' : expand()" @touchstart="touchStart" @touchmove.prevent="drag" @touchend="touchEnd">
       <div class="track-cover">
         <img :src="Object.keys(state.album).length !== 0 ? state.album.images[1].url : ''" v-show="Object.keys(state.album).length !== 0" />
       </div>
       <!-- 曲名/艺人名 -->
       <div class="track-detail">
-        <div class="container" ref="mini_detail" @touchstart.prevent="mini_touchStart" @touchmove.prevent="mini_drag" @touchend.prevent="mini_touchEnd">
+        <div class="container" ref="mini_detail" @touchstart="mini_touchStart" @touchmove.prevent="mini_drag" @touchend="mini_touchEnd">
           <div class="track-detail-item">
             <p class="name van-ellipsis">{{ prevTrack.name }}</p>
-            <p class="artists van-ellipsis">{{ prevTrack.artists.join(" · ") }}</p>
+            <p class="artists van-ellipsis">
+              {{ prevTrack.artists.join(" · ") }}
+            </p>
           </div>
           <div class="track-detail-item">
             <p class="name van-ellipsis">{{ state.name }}</p>
             <p class="artists van-ellipsis">{{ state.artists.join(" · ") }}</p>
           </div>
-
           <div class="track-detail-item">
             <p class="name van-ellipsis">{{ nextTrack.name }}</p>
-            <p class="artists van-ellipsis">{{ nextTrack.artists.join(" · ") }}</p>
+            <p class="artists van-ellipsis">
+              {{ nextTrack.artists.join(" · ") }}
+            </p>
           </div>
         </div>
       </div>
@@ -38,7 +41,7 @@
       </div>
     </div>
     <!-- 大面板 -->
-    <div class="large" ref="large" @click.prevent.stop="expanded ? '' : expand()" @touchstart="touchStart" @touchmove.prevent.stop="drag" @touchend="touchEnd">
+    <div class="large" ref="large" @click.stop="expanded ? '' : expand()" @touchstart="touchStart" @touchmove.prevent="drag" @touchend="touchEnd">
       <van-nav-bar :title="state.listName">
         <template #left>
           <van-icon name="arrow-down" size="18" @click.stop="close" />
@@ -111,7 +114,8 @@
           album: {},
           index: 0,
         },
-
+        // sliding
+        direction: null,
         // mini
         miniDistance: null,
         miniOffsetWidth: null,
@@ -158,15 +162,36 @@
         this.nowOffsetX = this.$refs.panel.offsetHeight
       },
       mini_drag(e) {
+        // 如果已经在做竖向滑动，跳出
+        if (this.direction === "v") return
+        // 获取参数
         let detail = this.$refs.mini_detail
         this.miniDistance = e.touches[0].pageX - this.touchStartX
-        console.log("distance: " + this.miniDistance)
+        // 改变 direction
+        // console.log({ miniDistance: this.miniDistance, distance: this.distance })
+        let md = Math.abs(this.miniDistance),
+          ld = Math.abs(this.distance)
+        let range = 5
+        // 如果：滑动超过range，而横向大于竖向，或者已经是横向
+        if (this.direction === "h" || ((md > range || ld > range) && md > ld)) {
+          // 触发横向
+          this.direction = "h"
+        }
+        // 如果：滑动超过range，且竖向大于横向
+        else if ((md > range || ld > range) && md < ld) {
+          // 触发竖向并跳出
+          this.direction = "v"
+          return
+        }
+        // 在触发前不进行动画
+        else return
+
         gsap.set(detail, { x: this.miniDistance })
       },
       mini_touchEnd() {
+        this.direction = null
         let detail = this.$refs.mini_detail
         if (this.miniDistance > 80) {
-          console.log(this.miniOffsetWidth)
           gsap.to(detail, { x: this.miniOffsetWidth })
           setTimeout(() => {
             this.prev()
@@ -179,7 +204,7 @@
         } else {
           gsap.to(detail, { x: 0 })
         }
-        this.distance = 0
+        this.miniDistance = 0
       },
       // large
       touchStart(e) {
@@ -192,6 +217,7 @@
       },
 
       drag(e) {
+        if (this.direction === "h") return
         let tabbar = this.$parent.$refs.tabbar.$el
         let panel = this.$refs.panel
         let mini = this.$refs.mini
@@ -218,7 +244,9 @@
         // 触摸起始点当超过封面下方时不被拖动
         if (this.expanded && this.touchStartY > this.$refs.detail.offsetTop) return
         // gsap
-        gsap.set(panel, { backgroundColor: "rgba(240,240,240," + easeOutExpo(percentage) + ")" })
+        gsap.set(panel, {
+          backgroundColor: "rgba(240,240,240," + easeOutExpo(percentage) + ")",
+        })
         gsap.set(mini, { opacity: 1 - easeOutExpo(percentage) })
         gsap.set(large, { opacity: easeOutExpo(percentage) })
         gsap.set(panel, { height: this.nowHeight - this.distance })
@@ -226,7 +254,7 @@
       },
       touchEnd() {
         if (this.expanded) {
-          if (this.distance >= 130) {
+          if (this.distance >= 120) {
             // 关
             this.close()
           } else {
@@ -249,7 +277,10 @@
         let panel = this.$refs.panel
         let mini = this.$refs.mini
         let large = this.$refs.large
-        gsap.to(panel, { height: "100%", backgroundColor: "rgba(240,240,240,1)" })
+        gsap.to(panel, {
+          height: "100%",
+          backgroundColor: "rgba(240,240,240,1)",
+        })
         gsap.to(mini, { opacity: 0 })
         gsap.to(large, { opacity: 1 })
         gsap.to(tabbar, { y: tabbar.offsetHeight })
@@ -262,7 +293,10 @@
         let mini = this.$refs.mini
         let large = this.$refs.large
         gsap.to(panel, { backgroundColor: "rgba(240,240,240,0)" })
-        gsap.to(panel, { height: this.originalHeight, backgroundColor: "rgba(240,240,240,0)" })
+        gsap.to(panel, {
+          height: this.originalHeight,
+          backgroundColor: "rgba(240,240,240,0)",
+        })
         gsap.to(mini, { opacity: 1 })
         gsap.to(large, { opacity: 0 })
         gsap.to(tabbar, { y: 0 })
@@ -299,7 +333,7 @@
       box-sizing: border-box;
       // overflow: hidden;
       margin: 0 auto;
-      padding: 4px 8px;
+      padding: 0px 8px;
       width: 100%;
       max-width: 92%;
       height: 54px;
@@ -325,12 +359,13 @@
       .track-detail {
         flex: 1;
         max-width: 75%;
-        height: 38px;
+        height: 48px;
+        padding: 5px 0;
         overflow: hidden;
         .container {
           display: flex;
           justify-content: center;
-
+          height: 100%;
           & .track-detail-item {
             width: 100%;
             flex-shrink: 0;
