@@ -100,10 +100,10 @@
         </van-cell>
       </van-list>
       <!-- 动作面板 -->
-      <van-action-sheet v-model="show" :actions="actions" @select="onSelect" cancel-text="取消" close-on-click-action safe-area-inset-bottom>
+      <van-action-sheet v-model="show" :actions="actions" @select="onSelect" cancel-text="取消" @close="onClose" close-on-click-action safe-area-inset-bottom>
         <template #description>
           <p></p>
-          <van-image :src="showAlbum && showAlbum.images[0].url" fit="cover" height="256" width="256"
+          <van-image :src="showAlbum && showAlbum.images[0].url" fit="cover" height="188" width="188"
             ><template v-slot:loading>
               <van-loading type="spinner" />
             </template>
@@ -204,8 +204,7 @@
             // 拿到歌单名
             this.listName = data.name || "已点赞的歌"
             // 歌单详情
-            this.primary_color = data.primary_color
-
+            this.primary_color = data.primary_color //主题色
             this.description = data.description || ""
             data.images && (this.backgroundImage = data.images[0].url)
             // 添加歌曲总数到变量
@@ -232,14 +231,10 @@
       },
       // 检查有无点赞
       checkSaved(items) {
-        const arr = items.map((v) => {
-          return v.track.id
-        })
-        console.log(arr)
-        this.$spotifyApi.containsMySavedTracks(arr, {}, (err, data) => {
+        let num = 50
+        const callback = (err, data) => {
           if (err) console.log(err)
           else {
-            console.log(data)
             this.list.forEach((v) => {
               if (v.saved === undefined) {
                 v.saved = data[0]
@@ -248,6 +243,20 @@
             })
             this.$forceUpdate()
           }
+        }
+
+        const arr = items.map((v) => {
+          return v.track.id
+        })
+        // 按num的个数给列表分块，放入idList
+        let idList = []
+        while (arr.length > num) {
+          idList.push(arr.splice(0, num))
+        }
+        idList.push(arr)
+
+        idList.forEach((arr) => {
+          this.$spotifyApi.containsMySavedTracks(arr, {}, callback)
         })
       },
       toggleSaved() {},
@@ -299,6 +308,17 @@
           return v.name
         })
         this.showAlbum = album
+        let tabbar = this.$parent.$parent.$refs.tabbar.$el
+
+        gsap.to(tabbar, { y: tabbar.offsetHeight })
+      },
+      onClose() {
+        let tabbar = this.$parent.$parent.$refs.tabbar.$el
+        if (this.show) {
+          gsap.to(tabbar, { y: tabbar.offsetHeight })
+        } else {
+          gsap.to(tabbar, { y: 0 })
+        }
       },
     },
     mounted() {
@@ -409,18 +429,19 @@
           }
         }
       }
-      .van-action-sheet {
-        h2,
-        p {
-          color: #000;
-        }
-        max-height: 90%;
-        .van-action-sheet__item {
-          height: 60px;
-        }
-        .van-action-sheet__cancel {
-          height: 60px;
-        }
+    }
+
+    .van-action-sheet {
+      h2,
+      p {
+        color: #000;
+      }
+      max-height: 95%;
+      .van-action-sheet__item {
+        height: 60px;
+      }
+      .van-action-sheet__cancel {
+        height: 60px;
       }
     }
   }

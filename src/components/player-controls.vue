@@ -43,10 +43,10 @@
             <van-progress :percentage="currentRate" color="#1fd760" track-color="#999" stroke-width="4" :show-pivot="false" />
           </div>
           <div class="play-button">
-            <van-icon name="arrow-left" size="58" @click.stop="prev" />
-            <van-icon v-if="!state.isPlaying" @click.stop="!state.url || play()" name="play-circle-o" size="58" />
-            <van-icon v-if="state.isPlaying" @click.stop="!state.url || pause()" name="pause-circle-o" size="58" />
-            <van-icon name="arrow" @click.stop="next" size="58" />
+            <van-icon name="arrow-left" size="54" @click.stop="prev" />
+            <van-icon v-if="!state.isPlaying" @click.stop="!state.url || play()" name="play-circle-o" size="54" />
+            <van-icon v-if="state.isPlaying" @click.stop="!state.url || pause()" name="pause-circle-o" size="54" />
+            <van-icon name="arrow" @click.stop="next" size="54" />
           </div>
         </div>
       </div>
@@ -315,6 +315,9 @@
             width: 80px;
             margin: 30px auto 0;
             text-align: center;
+            .van-icon:active {
+              transform: scale(0.98);
+            }
           }
         }
       }

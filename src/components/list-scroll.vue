@@ -49,7 +49,7 @@
       overflow: auto;
       display: flex;
       gap: 14px;
-      padding: 0 170px 0 15px;
+      padding: 0 15px 0 15px;
       -ms-overflow-style: none; /* IE and Edge */
       scrollbar-width: none; /* Firefox */
       &::-webkit-scrollbar {
